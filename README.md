@@ -100,19 +100,19 @@ This downloads three checkpoints (Model A before and after phase 2, Model B;
   position at every layer: Model A drops to chance (19.9% with all five
   zeroed) while Model B stays at 98.0% — it never reads the `<op>` positions,
   so its 100%s in the other rows mean "nothing to ablate", not
-  "ablation-robust". (The writeup's footnote quotes 15% for both models; that
-  run also zeroed the `<predict>` readout, which takes any model to chance.)
+  "ablation-robust";
 - a layer sweep (`lego.ablate_critical_layer --sweep`): accuracy with each
-  element and `<op>` position zeroed from every layer onward. Model A
-  consumes one operand per layer (the "all element positions" row climbs
-  gradually to L6); Model B consumes them all at once, early (a single cliff
-  between L3 and L4) — so the non-sequential model also has a critical
-  layer, just one shared by every input;
+  element and `<op>` position zeroed from every layer onward. Its "all
+  element positions" row is the writeup's last table: Model A consumes one
+  operand per layer (14 → 19 → 28 → 35 → 47 → 60 → 99%), Model B consumes
+  them all at once and is done by L4 (45% → 95%) — so the non-sequential
+  model also has a critical layer, just one shared by every input, and
+  earlier than a 6-step algorithm allows;
 - the progressive/reverse/random clause-zeroing test from RESULTS.md
   (`lego.ablate_sequential`).
 
-Every number in the writeup's four tables (and, with `<predict>` included,
-its 15% footnote) reproduces exactly from these checkpoints (n = 500 examples and `--seed 999` for the lens
+Every number in the writeup's five tables reproduces exactly from these
+checkpoints (n = 500 examples and `--seed 999` for the lens
 tables, n = 1000 and `--seed 999` for the critical-layer ablation). Any script
 also takes a local `--checkpoint path.pt`.
 
@@ -170,8 +170,8 @@ replicates and weight-shared arms it mentions.
 
 `lego/ablate_critical_layer.py` was written for this release; the original
 per-layer ablation script was never committed. It uses the model's existing
-`forward_with_layer_hooks` API and its output matches the writeup's table and
-footnote exactly, which is the only sense in which it is "the same" analysis.
+`forward_with_layer_hooks` API and its output matches the writeup's ablation
+tables exactly, which is the only sense in which it is "the same" analysis.
 
 **All of the code in this repository was written and run by Claude
 (Anthropic's Claude Code), based on
