@@ -1,0 +1,77 @@
+[project]
+name = "sequential-transformer-lens-experiment"
+version = "1.0.0"
+description = "Training a transformer to compose one step per layer (and proving it): code and checkpoints"
+requires-python = ">=3.12"
+dependencies = [
+    "torch>=2.0",
+    "pydantic>=2.0",
+    "wandb>=0.19",
+    "matplotlib>=3.9",
+    "numpy>=1.26",
+    "huggingface-hub>=0.26",
+]
+
+[dependency-groups]
+dev = [
+    # Pinned exactly: ruff and pyright change their output across releases.
+    "pyright==1.1.408",
+    "ruff==0.15.1",
+    "pytest>=8.0",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+    "E",     # pycodestyle errors
+    "F",     # pyflakes
+    "I",     # isort
+    "UP",    # pyupgrade
+    "B",     # flake8-bugbear
+    "SIM",   # flake8-simplify
+    "TCH",   # flake8-type-checking
+    "ANN",   # flake8-annotations
+    "RUF",   # ruff-specific rules
+]
+ignore = []
+# Typographic characters used deliberately in printed tables and labels.
+allowed-confusables = ["×", "−", "ℓ"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["common", "lego"]
+known-third-party = ["wandb"]  # a local wandb/ run dir must not flip classification
+
+[tool.pytest.ini_options]
+markers = [
+    "smoke: end-to-end CPU training smoke test (slower)",
+]
+
+[tool.pyright]
+pythonVersion = "3.12"
+typeCheckingMode = "standard"
+venvPath = "."
+venv = ".venv"
+# Specifying `exclude` replaces pyright's defaults, so re-list them —
+# otherwise pyright analyzes `.venv` and never finishes.
+exclude = [
+    "**/node_modules",
+    "**/__pycache__",
+    "**/.*",
+]
+
+[tool.uv]
+# Rolling 7-day supply-chain delay on new package releases. Lives here (not in
+# a user-level uv.toml) so CI and local resolve identically: uv records the
+# option in uv.lock, and a runner lacking it re-resolves and fails
+# `uv sync --locked`.
+exclude-newer = "7 days"
+
+[tool.hatch.build.targets.wheel]
+packages = ["common", "lego"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
