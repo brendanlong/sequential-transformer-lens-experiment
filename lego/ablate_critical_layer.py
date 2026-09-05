@@ -160,38 +160,30 @@ def main() -> None:
         + f"{'—':>10s}"
     )
 
-    for label, offset in (("Zero from critical+1", 1), ("Zero from critical", 0)):
+    def row(label: str, zero_from: dict[int, int]) -> None:
         per_pos = [
-            accuracy_with_ablation(model, input_ids, k, {p: critical[p] + offset})
+            accuracy_with_ablation(model, input_ids, k, {p: zero_from[p]})
             for p in positions
         ]
-        together = accuracy_with_ablation(
-            model, input_ids, k, {p: critical[p] + offset for p in positions}
-        )
+        together = accuracy_with_ablation(model, input_ids, k, zero_from)
         print(
             f"{label:32s}"
             + "".join(f"{a:>16.1%}" for a in per_pos)
             + f"{together:>10.1%}"
         )
 
-    # The writeup's "ALL <op> positions zeroed from any layer" control zeroed
-    # positions 4..2(k+1) — the t[1]..t[k] positions, which *include* the
-    # <predict> readout — so it destroys accuracy trivially for any model.
-    # The intermediates-only variant is the informative one.
+    row("Zero from critical+1", {p: critical[p] + 1 for p in positions})
+    row("Zero from critical", {p: critical[p] for p in positions})
+    # Every layer: a model that never reads the <op> positions stays at 100%
+    # here, which is what distinguishes "ablation-robust" from "unused".
+    row("Zero from L0 (every layer)", dict.fromkeys(positions, 0))
+
+    # The writeup's original footnote zeroed t[1]..t[k], i.e. the <predict>
+    # readout too, which takes any model to chance and so says nothing.
     with_predict = accuracy_with_ablation(
-        model, input_ids, k, {p: 0 for p in [*positions, answer_position(k) - 1]}
+        model, input_ids, k, dict.fromkeys([*positions, answer_position(k) - 1], 0)
     )
-    without_predict = accuracy_with_ablation(
-        model, input_ids, k, {p: 0 for p in positions}
-    )
-    print(
-        f"\nZero <op> positions t[1]..t[{k}] at every layer "
-        f"(includes <predict>; the writeup's 'all <op>' control): {with_predict:.1%}"
-    )
-    print(
-        f"Zero <op> positions t[1]..t[{k - 1}] at every layer "
-        f"(intermediates only, <predict> intact): {without_predict:.1%}"
-    )
+    print(f"\n(+ <predict> position zeroed at every layer: {with_predict:.1%})")
 
 
 if __name__ == "__main__":
