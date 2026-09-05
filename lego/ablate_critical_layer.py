@@ -10,6 +10,12 @@ to exist by a specific *critical* layer and never again after it. So:
 
 A model that is not sequential (the writeup's Model B) survives both.
 
+``--sweep`` prints the full picture instead: for every element and ``<op>``
+position, accuracy when it is zeroed from each layer onward, plus "all
+element positions" / "all <op> positions" rows. A sequential model consumes
+one operand per layer (the all-elements row climbs gradually); a parallel
+one consumes them all at once (a single cliff, early).
+
 Critical layers default to the layer where the logit lens reads each
 intermediate best (the staircase's peak per position). For a model with no
 staircase, pass them explicitly — the writeup applies Model A's layers to
@@ -71,6 +77,34 @@ def accuracy_with_ablation(
     return (preds == input_ids[:, ans_pos]).float().mean().item()
 
 
+def element_positions(k: int) -> list[int]:
+    """Positions of the start element and the k operands (pos 2j+1 for j = 0..k)."""
+    return [2 * j + 1 for j in range(k + 1)]
+
+
+def print_layer_sweep(
+    model: AnyModel, input_ids: Tensor, k: int, n_layers: int
+) -> None:
+    """Accuracy with each position zeroed from layer L onward, for every L."""
+    rows: list[tuple[str, list[int]]] = [("e0 (pos 1)", [1])]
+    rows += [(f"g{j} (pos {2 * j + 1})", [2 * j + 1]) for j in range(1, k + 1)]
+    rows += [(f"t[{j}] <op> (pos {2 * j + 2})", [2 * j + 2]) for j in range(1, k)]
+    rows += [
+        ("all element positions", element_positions(k)),
+        ("all <op> positions", op_positions(k)),
+    ]
+    print("\nAccuracy with the position zeroed from layer L onward (100% = consumed)")
+    print(
+        f"{'position':26s}" + "".join(f"{'L' + str(li):>7s}" for li in range(n_layers))
+    )
+    for label, pos in rows:
+        accs = [
+            accuracy_with_ablation(model, input_ids, k, dict.fromkeys(pos, li))
+            for li in range(n_layers)
+        ]
+        print(f"{label:26s}" + "".join(f"{a:>7.1%}" for a in accs))
+
+
 # A peak below this is not a staircase step: chance is 1/6 for S3 and the
 # writeup's weakest real step (t[5] in Model A) peaks at 48%.
 MIN_PEAK = 1 / 3
@@ -109,6 +143,12 @@ def main() -> None:
         help="Critical layer for t[1]..t[k-1] (k-1 values). Default: the layer "
         "where the logit lens peaks; required when a position has no peak.",
     )
+    parser.add_argument(
+        "--sweep",
+        action="store_true",
+        help="Print accuracy for every position zeroed from every layer instead "
+        "of the critical-layer table.",
+    )
     args = parser.parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -125,6 +165,10 @@ def main() -> None:
     input_ids = torch.tensor(
         [encode(ex) for ex in examples], dtype=torch.long, device=device
     )
+
+    if args.sweep:
+        print_layer_sweep(model, input_ids, k, n_layers)
+        return
 
     if args.critical_layers is not None:
         if len(args.critical_layers) != len(positions):

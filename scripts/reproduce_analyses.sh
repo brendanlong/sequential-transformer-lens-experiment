@@ -26,6 +26,10 @@ uv run python -m lego.ablate_critical_layer --checkpoint "$A"
 echo "=== Critical-layer ablation, Model B (Model A's critical layers) ==="
 uv run python -m lego.ablate_critical_layer --checkpoint "$B" --critical-layers 1 2 3 4 5
 
+echo "=== Layer sweep: every element and <op> position zeroed from each layer ==="
+uv run python -m lego.ablate_critical_layer --checkpoint "$A" --sweep
+uv run python -m lego.ablate_critical_layer --checkpoint "$B" --sweep
+
 echo "=== Progressive / reverse / random clause zeroing (RESULTS.md Phase 16 table) ==="
 uv run python -m lego.ablate_sequential --checkpoint "$A"
 uv run python -m lego.ablate_sequential --checkpoint "$B"

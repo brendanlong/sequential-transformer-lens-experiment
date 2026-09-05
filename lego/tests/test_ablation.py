@@ -83,3 +83,11 @@ def test_progressive_mask_consumes_one_clause_per_layer() -> None:
     for layer in range(n_layers):
         expected = {p for c in clauses[: min(layer + 1, len(clauses))] for p in c}
         assert set(mask[layer].nonzero().flatten().tolist()) == expected
+
+
+def test_element_positions_interleave_with_ops() -> None:
+    from lego.ablate_critical_layer import element_positions
+
+    k = 6
+    assert element_positions(k) == [1, 3, 5, 7, 9, 11, 13]
+    assert not set(element_positions(k)) & set(op_positions(k))

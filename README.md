@@ -102,6 +102,12 @@ This downloads three checkpoints (Model A before and after phase 2, Model B;
   so its 100%s in the other rows mean "nothing to ablate", not
   "ablation-robust". (The writeup's footnote quotes 15% for both models; that
   run also zeroed the `<predict>` readout, which takes any model to chance.)
+- a layer sweep (`lego.ablate_critical_layer --sweep`): accuracy with each
+  element and `<op>` position zeroed from every layer onward. Model A
+  consumes one operand per layer (the "all element positions" row climbs
+  gradually to L6); Model B consumes them all at once, early (a single cliff
+  between L3 and L4) — so the non-sequential model also has a critical
+  layer, just one shared by every input;
 - the progressive/reverse/random clause-zeroing test from RESULTS.md
   (`lego.ablate_sequential`).
 
