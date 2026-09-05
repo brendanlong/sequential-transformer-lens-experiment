@@ -222,8 +222,9 @@ def main() -> None:
     # here, which is what distinguishes "ablation-robust" from "unused".
     row("Zero from L0 (every layer)", dict.fromkeys(positions, 0))
 
-    # The writeup's original footnote zeroed t[1]..t[k], i.e. the <predict>
-    # readout too, which takes any model to chance and so says nothing.
+    # An earlier version of the writeup quoted this "all <op> positions" number
+    # (15% for both models); it zeroes t[1]..t[k], i.e. the <predict> readout
+    # too, which takes any model to chance and so says nothing.
     with_predict = accuracy_with_ablation(
         model, input_ids, k, dict.fromkeys([*positions, answer_position(k) - 1], 0)
     )
