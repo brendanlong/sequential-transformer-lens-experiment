@@ -1,7 +1,7 @@
 #!/bin/bash
 # Regenerate the writeup's tables from the hosted checkpoints
 # (https://huggingface.co/datasets/brendanlong/sequential-transformer-lens-experiment).
-# No GPU, no accounts; ~30 MB of checkpoints download on first use.
+# No GPU, no accounts; three ~3.6 MB checkpoints download on first use; ~30 s.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 

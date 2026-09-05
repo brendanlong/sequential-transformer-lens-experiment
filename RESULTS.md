@@ -33,6 +33,18 @@
 > The writeup's Model A is the `Std 96d/6h/8L kp=2, seed 42` pair
 > (`7gwt74kt` → `clzbke38`) and Model B is the `FSL-only kp=2, seed 42` run
 > (`b5mcg9s9`), both in [Phase 16](results/13-k-weighted-curriculum.md).
+> Phase 16 lists the seed-43 FSL phase as "(same run)"; the wandb artifact
+> log shows it was logged by a separate run, `oq617s0t`, which is the ID the
+> HF dataset uses.
+>
+> Two small differences between this repo's scripts and the ones the log
+> was written with: (1) `lego/analyze_logit_lens.py` labels the `<op>`
+> columns by their true positions (`p4→t[1]`, `p6→t[2]`, …); the original
+> printed `p2→t[1]`, and a few early entries here (results/02, results/04)
+> repeat that off-by-one label — the probe itself always read position
+> 2(j+1) for t[j]. (2) `lego/curriculum_ao_to_fsl.py` defaults to the
+> writeup's budgets (30M AO / 50M FSL examples, vs 5M AO originally) and
+> writes each phase's periodic checkpoints to its own subdirectory.
 
 Based on ["Unveiling Transformers with LEGO"](https://arxiv.org/abs/2206.04301) (Zhang et al., 2022).
 

@@ -174,10 +174,24 @@ def main() -> None:
             + f"{together:>10.1%}"
         )
 
-    all_ops = accuracy_with_ablation(
-        model, input_ids, k, {p: 0 for p in [2, *positions]}
+    # The writeup's "ALL <op> positions zeroed from any layer" control zeroed
+    # positions 4..2(k+1) — the t[1]..t[k] positions, which *include* the
+    # <predict> readout — so it destroys accuracy trivially for any model.
+    # The intermediates-only variant is the informative one.
+    with_predict = accuracy_with_ablation(
+        model, input_ids, k, {p: 0 for p in [*positions, answer_position(k) - 1]}
     )
-    print(f"\nZero every <op> position at every layer: {all_ops:.1%}")
+    without_predict = accuracy_with_ablation(
+        model, input_ids, k, {p: 0 for p in positions}
+    )
+    print(
+        f"\nZero <op> positions t[1]..t[{k}] at every layer "
+        f"(includes <predict>; the writeup's 'all <op>' control): {with_predict:.1%}"
+    )
+    print(
+        f"Zero <op> positions t[1]..t[{k - 1}] at every layer "
+        f"(intermediates only, <predict> intact): {without_predict:.1%}"
+    )
 
 
 if __name__ == "__main__":

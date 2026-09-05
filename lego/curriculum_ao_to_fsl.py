@@ -14,7 +14,9 @@ This is the recipe behind the writeup's Model A:
         --k-power 2 --seed 42
 
 Checkpoints land in ``--checkpoint-dir`` as ``curriculum_ao.pt`` and
-``curriculum_fsl.pt`` (plus periodic ``step_N.pt`` from the training loop).
+``curriculum_fsl.pt``; the training loop's periodic ``step_N.pt`` files go to
+``<checkpoint-dir>/ao/`` and ``<checkpoint-dir>/fsl/`` so phase 2 never
+overwrites phase 1's.
 """
 
 import argparse
@@ -84,6 +86,7 @@ def main() -> None:
     parser.add_argument("--weight-shared", action="store_true")
     parser.add_argument("--batch-size", type=int, default=512)
     parser.add_argument("--lr", type=float, default=3e-4)
+    # Defaults are the writeup's budgets (the research code defaulted to 5M AO).
     parser.add_argument("--ao-examples", type=int, default=30_000_000)
     parser.add_argument("--fsl-examples", type=int, default=50_000_000)
     parser.add_argument("--seed", type=int, default=42)
@@ -174,7 +177,7 @@ def main() -> None:
         eval_every_steps=1000,
         eval_batch_size=args.batch_size,
         run_name=f"{arch}_curriculum_AO",
-        checkpoint_dir=Path(args.checkpoint_dir),
+        checkpoint_dir=Path(args.checkpoint_dir) / "ao",
         save_every_steps=5000,
         use_wandb=not args.no_wandb,
         wandb_project=args.wandb_project,
@@ -235,7 +238,7 @@ def main() -> None:
         eval_every_steps=1000,
         eval_batch_size=args.batch_size,
         run_name=f"{arch}_curriculum_FSL",
-        checkpoint_dir=Path(args.checkpoint_dir),
+        checkpoint_dir=Path(args.checkpoint_dir) / "fsl",
         save_every_steps=5000,
         use_wandb=not args.no_wandb,
         wandb_project=args.wandb_project,

@@ -14,11 +14,10 @@ We test a "progressive causal zeroing" schedule:
 We also test:
 - Random zeroing (same number of positions, randomly chosen) as a control
 - Reverse zeroing (zero clauses that HAVEN'T been consumed yet) — should break
-- "All positions except answer" zeroing at the final layer
 
 Usage:
     uv run python -m lego.ablate_sequential \
-        --checkpoint data/lego/checkpoints/curriculum_fsl.pt
+        --checkpoint hf:lego/std_96d_6h_8L_kp2_s42_curriculum_FSL/step_97656.pt
 """
 
 import argparse

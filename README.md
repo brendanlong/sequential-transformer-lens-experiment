@@ -14,8 +14,10 @@ combination of choices, and then some mechanistic work to prove it happened:
    collapses to counting minus signs in one layer.
 2. **Loss curriculum:** train with loss on the answer token only until 100%,
    *then* switch to full-sequence (next-token) loss. Full-sequence loss from
-   scratch always produced a memorized table; a sequential algorithm learned
-   under answer-only loss survives the switch.
+   scratch (3/3 seeds) produced 100%-accurate models with no intermediate
+   state visible to the lens and no dependence on any particular layer —
+   behaviourally a lookup table; a sequential algorithm learned under
+   answer-only loss survives the switch.
 3. **Data weighting by difficulty:** sample chain length k with weight k²
    (1:4:9:16:25:36). This produced the first clean one-step-per-layer
    staircase in a *standard* (non-weight-shared) transformer.
@@ -56,6 +58,7 @@ lego/
   analyze_logit_lens.py   # the staircase tables (+ heatmap figure)
   ablate_critical_layer.py# zero <op> positions from / after their critical layer (the writeup's ablation)
   ablate_sequential.py    # progressive / reverse / random clause zeroing (RESULTS.md)
+                          # (train.py takes --group S3|S4|A5|S5; the curriculum and analysis scripts are S3-only)
   tests/                  # fast CPU tests + a smoke training run
 common/                   # checkpoint I/O + HF artifact download, optimizer, schedule, streaming, wandb
 results/                  # per-phase experiment logs linked from RESULTS.md
@@ -70,34 +73,41 @@ Requires Python ≥ 3.12 and [uv](https://docs.astral.sh/uv/):
 
 ```bash
 uv sync
-uv run pytest             # ~100 CPU tests incl. a 15 s smoke training run
+uv run pytest             # 127 CPU tests incl. a smoke training run, ~6 s
 ```
 
 A GPU is optional for the analyses (models are tiny, checkpoints download on
 demand) and strongly recommended for training (any ~8 GB card is plenty).
 
-## Reproduce the analyses (no GPU, no accounts, ~2 minutes)
+## Reproduce the analyses (no GPU, no accounts, ~30 seconds)
 
 ```bash
 ./scripts/reproduce_analyses.sh
 ```
 
-This downloads the two writeup checkpoints (~4 MB each) and prints:
+This downloads three checkpoints (Model A before and after phase 2, Model B;
+~3.6 MB each) and prints:
 
-- the logit-lens staircase tables for Model A after phase 1, Model A, and
-  Model B (`lego.analyze_logit_lens`). The writeup's tables are the
-  `top-1 match rate` at `<op>` positions (the script also prints softmax
-  probability mass, which is within a few points);
+- the logit-lens staircase tables (`lego.analyze_logit_lens`). The writeup's
+  tables are captioned "softmax probability" but their numbers are the
+  `top-1 match rate` at `<op>` positions, which is what reproduces them; the
+  script also prints the actual softmax mass, which tracks top-1 within ~10
+  points;
 - the critical-layer ablation tables (`lego.ablate_critical_layer`) — for
   Model A the critical layers are read off the lens (L1–L5 for t[1]–t[5]);
   for Model B, which has no staircase, Model A's layers are applied with
-  `--critical-layers 1 2 3 4 5`;
+  `--critical-layers 1 2 3 4 5`. The script's last two lines are the
+  writeup's "all `<op>` positions zeroed → 15%" control, which — as in the
+  original analysis — includes the `<predict>` readout position and so
+  destroys any model, and the intermediates-only variant, which separates
+  the models (Model A 19.9%, Model B 98.0%);
 - the progressive/reverse/random clause-zeroing test from RESULTS.md
   (`lego.ablate_sequential`).
 
-Every number in the writeup's tables reproduces exactly from these
-checkpoints (n = 500 examples for the lens tables, n = 1000 for the ablation,
-`--seed 999`). Any script also takes a local `--checkpoint path.pt`.
+Every number in the writeup's four tables, and its 15% footnote, reproduces
+exactly from these checkpoints (n = 500 examples and `--seed 999` for the lens
+tables, n = 1000 and `--seed 999` for the critical-layer ablation). Any script
+also takes a local `--checkpoint path.pt`.
 
 ## Reproduce the training (~a GPU-evening)
 
@@ -117,11 +127,15 @@ uv run python -m lego.train --dim 96 --n-heads 6 --n-layers 8 --loss-mode full-s
 ```
 
 Model A is 58,593 answer-only steps + 97,656 full-sequence steps and Model B
-is 156,250 full-sequence steps at batch 512 (~16–20 steps/s on an RTX 3060 Ti,
-so a few hours each). Runs log to wandb by default; pass `--no-wandb` to skip.
+is 156,250 full-sequence steps at batch 512. Wall-clock was not recorded for
+these two runs; comparable 8-layer runs in RESULTS.md did ~16 steps/s on an
+RTX 3060 Ti, so expect a few hours each (Model A was trained on a 3060 Ti,
+Model B on an RTX 4090). The script logs to wandb only if `WANDB_API_KEY` is
+set; the bare commands above log by default — pass `--no-wandb` to skip.
 **The outcome is seed-dependent** — that is much of the point of the writeup —
-so a rerun may give a noisier staircase (seed 43 did; its checkpoints are on
-the HF dataset too).
+so a rerun may not show a staircase at all: seed 43 reached 100% accuracy but
+lost the lens-visible staircase for t[1]–t[3] (its checkpoints are on the HF
+dataset too).
 
 ### On a cloud GPU (SkyPilot)
 
@@ -132,7 +146,6 @@ sky launch skypilot/reproduce.yaml --infra <your-cloud> --down -y \
   --env RUN_CMD="uv run python -m lego.train --dim 96 --n-heads 6 --n-layers 8 --loss-mode full-sequence --generate-n 80000000 --k-power 2 --seed 42 --no-compile --no-wandb"
 ```
 
-Both models together are roughly a dollar or two on a spot RTX 3090/4090.
 Pass `--secret WANDB_API_KEY` to log to your own wandb.
 
 ## Provenance
@@ -143,13 +156,15 @@ more interpretable than standard ones); the writeup is the "how to train a
 sequential model at all" part of that story. `RESULTS.md` is the monorepo's
 experiment log verbatim, with a header note mapping its commands and private
 checkpoint URIs onto this repo. Only the code the writeup needs is included
-(the note lists what isn't); the public checkpoints are the S3 → HF copies of
-the runs the writeup uses, plus the seed replicates and weight-shared arms it
-mentions.
+(the note lists what isn't); the public checkpoints are copies of the runs
+the writeup uses (identified through the wandb artifact log and confirmed
+against the tables in `results/13-k-weighted-curriculum.md`), plus the seed
+replicates and weight-shared arms it mentions.
 
-The `lego/ablate_critical_layer.py` script was written for this release to
-reproduce the writeup's ablation table from the same hooks the original
-(uncommitted) analysis used; its output matches the writeup exactly.
+`lego/ablate_critical_layer.py` was written for this release; the original
+per-layer ablation script was never committed. It uses the model's existing
+`forward_with_layer_hooks` API and its output matches the writeup's table and
+footnote exactly, which is the only sense in which it is "the same" analysis.
 
 **All of the code in this repository was written and run by Claude
 (Anthropic's Claude Code), based on
