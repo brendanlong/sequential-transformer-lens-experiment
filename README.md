@@ -96,16 +96,23 @@ This downloads three checkpoints (Model A before and after phase 2, Model B;
 - the critical-layer ablation tables (`lego.ablate_critical_layer`) — for
   Model A the critical layers are read off the lens (L1–L5 for t[1]–t[5]);
   for Model B, which has no staircase, Model A's layers are applied with
-  `--critical-layers 1 2 3 4 5`. The script's last two lines are the
-  writeup's "all `<op>` positions zeroed → 15%" control, which — as in the
-  original analysis — includes the `<predict>` readout position and so
-  destroys any model, and the intermediates-only variant, which separates
-  the models (Model A 19.9%, Model B 98.0%);
+  `--critical-layers 1 2 3 4 5`. A third row, "zero from L0", zeroes each
+  position at every layer: Model A drops to chance (19.9% with all five
+  zeroed) while Model B stays at 98.0% — it never reads the `<op>` positions,
+  so its 100%s in the other rows mean "nothing to ablate", not
+  "ablation-robust". (The writeup's footnote quotes 15% for both models; that
+  run also zeroed the `<predict>` readout, which takes any model to chance.)
+- a layer sweep (`lego.ablate_critical_layer --sweep`): accuracy with each
+  element and `<op>` position zeroed from every layer onward. Model A
+  consumes one operand per layer (the "all element positions" row climbs
+  gradually to L6); Model B consumes them all at once, early (a single cliff
+  between L3 and L4) — so the non-sequential model also has a critical
+  layer, just one shared by every input;
 - the progressive/reverse/random clause-zeroing test from RESULTS.md
   (`lego.ablate_sequential`).
 
-Every number in the writeup's four tables, and its 15% footnote, reproduces
-exactly from these checkpoints (n = 500 examples and `--seed 999` for the lens
+Every number in the writeup's four tables (and, with `<predict>` included,
+its 15% footnote) reproduces exactly from these checkpoints (n = 500 examples and `--seed 999` for the lens
 tables, n = 1000 and `--seed 999` for the critical-layer ablation). Any script
 also takes a local `--checkpoint path.pt`.
 
