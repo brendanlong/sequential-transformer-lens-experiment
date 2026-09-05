@@ -62,6 +62,13 @@ exclude = [
     "**/.*",
 ]
 
+[tool.uv]
+# Rolling 7-day supply-chain delay on new package releases. Lives here (not in
+# a user-level uv.toml) so CI and local resolve identically: uv records the
+# option in uv.lock, and a runner lacking it re-resolves and fails
+# `uv sync --locked`.
+exclude-newer = "7 days"
+
 [tool.hatch.build.targets.wheel]
 packages = ["common", "lego"]
 
