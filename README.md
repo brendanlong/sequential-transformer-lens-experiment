@@ -58,6 +58,7 @@ lego/
   analyze_logit_lens.py   # the staircase tables (+ heatmap figure)
   ablate_critical_layer.py# zero <op> positions from / after their critical layer (the writeup's ablation)
   ablate_sequential.py    # progressive / reverse / random clause zeroing (RESULTS.md)
+  probe_lens_gap.py       # linear probes vs the lens: how much it sees (results/probe-lens-gap.md)
                           # (train.py takes --group S3|S4|A5|S5; the curriculum and analysis scripts are S3-only)
   tests/                  # fast CPU tests + a smoke training run
 common/                   # checkpoint I/O + HF artifact download, optimizer, schedule, streaming, wandb
@@ -110,6 +111,12 @@ This downloads three checkpoints (Model A before and after phase 2, Model B;
   earlier than a 6-step algorithm allows;
 - the progressive/reverse/random clause-zeroing test from RESULTS.md
   (`lego.ablate_sequential`).
+
+Not in the writeup: [`results/probe-lens-gap.md`](results/probe-lens-gap.md)
+compares the lens with linear probes (`lego.probe_lens_gap`, ~1 min per
+model). In Model A, intermediates the lens loses after their layer are still
+fully linearly decodable, just rotated out of the embedding directions. In
+Model B, nothing intermediate is linearly decodable at all.
 
 Every number in the writeup's five tables reproduces exactly from these
 checkpoints (n = 500 examples and `--seed 999` for the lens
