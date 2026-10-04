@@ -2,7 +2,10 @@
 
 At every layer and every ``<op>``/``<predict>`` position, trains a linear probe
 on the final-normed residual (what the lens reads) and compares it with the
-lens's top-1 accuracy. The lens can only distinguish group elements through
+lens's top-1 accuracy. The lens is scored both as-is (top-1 over the whole
+vocabulary, as in the staircase tables; early layers often decode to a
+structural token like ``<op>``) and restricted to the six element logits.
+The restricted lens can only distinguish group elements through
 the 5-dimensional *visible* subspace spanned by the six element embeddings
 (minus their mean, since softmax ignores a shared offset); everything else in
 the 96-dimensional residual is *dark* to it. Probes on each part separately
@@ -73,15 +76,35 @@ def run_product(ex: ChainExample, first: int, last: int) -> int:
 
 def run_label(first: int, last: int) -> str:
     names = ["e0"] + [f"g{i}" for i in range(1, last + 1)]
-    return names[first] if first == last else f"{names[last]}…{names[first]}"
+    if first == last:
+        return names[first]
+    sep = "·" if last == first + 1 else "…"
+    return f"{names[last]}{sep}{names[first]}"
+
+
+def centered_element_unembedding(model: AnyModel) -> Tensor:
+    """(6, dim) element rows minus their mean: softmax ignores a shared shift."""
+    first = element_token(0)
+    rows = model.tok_emb.weight[first : first + N_ELEMENTS].detach()
+    return rows - rows.mean(0)
 
 
 def visible_basis(model: AnyModel) -> Tensor:
     """Orthonormal (dim, 5) basis of the element embeddings' differences."""
-    first = element_token(0)
-    rows = model.tok_emb.weight[first : first + N_ELEMENTS].detach()
-    u, _s, _vh = torch.linalg.svd((rows - rows.mean(0)).T, full_matrices=False)
+    u, _s, _vh = torch.linalg.svd(
+        centered_element_unembedding(model).T, full_matrices=False
+    )
     return u[:, : N_ELEMENTS - 1]
+
+
+def relative_visibility(centered: Tensor, unembed: Tensor) -> float:
+    """How strongly the element-only lens reads these vectors vs random directions.
+
+    ‖W y‖² / ‖y‖² summed over the batch, divided by its expectation for an
+    isotropic y, ‖W‖²_F / dim. 1 = as visible as a random direction, 0 = dark.
+    """
+    stretch = (centered @ unembed.T).pow(2).sum() / centered.pow(2).sum()
+    return (stretch / (unembed.pow(2).sum() / unembed.shape[1])).item()
 
 
 def random_basis(dim: int, rank: int, generator: torch.Generator) -> Tensor:
@@ -158,6 +181,7 @@ def main() -> None:
     lens = make_logit_lens_fn(model)
 
     visible = visible_basis(model).cpu()
+    unembed = centered_element_unembedding(model).cpu()
     generator = torch.Generator().manual_seed(args.seed)
     randoms = [
         random_basis(config.dim, visible.shape[1], generator)
@@ -168,7 +192,10 @@ def main() -> None:
     def table() -> Tensor:
         return torch.zeros(n_layers, k)
 
-    lens_acc, visible_var = table(), table()
+    lens_acc, lens_elem_acc, elem_top1, visible_var, rel_vis = (
+        table() for _ in range(5)
+    )
+    first_elem = element_token(0)
     probes = {
         name: table() for name in ["full", "visible (5d)", "random 5d", "dark (91d)"]
     }
@@ -180,12 +207,18 @@ def main() -> None:
             x_tr, x_te = res_train[layer][:, pos], res_test[layer][:, pos]
             y_tr, y_te = (_labels(d, TARGETS["state t[j]"], j) for d in (train, test))
 
-            top1 = lens(x_te.to(device), layer).argmax(-1).cpu()
-            lens_acc[layer, col] = (top1 == y_te + element_token(0)).float().mean()
+            logits = lens(x_te.to(device), layer).cpu()
+            top1 = logits.argmax(-1)
+            lens_acc[layer, col] = (top1 == y_te + first_elem).float().mean()
+            is_elem = (top1 >= first_elem) & (top1 < first_elem + N_ELEMENTS)
+            elem_top1[layer, col] = is_elem.float().mean()
+            elem_logits = logits[:, first_elem : first_elem + N_ELEMENTS]
+            lens_elem_acc[layer, col] = (elem_logits.argmax(-1) == y_te).float().mean()
 
             centered = x_te - x_te.mean(0)
             visible_energy = (centered @ visible).pow(2).sum()
             visible_var[layer, col] = visible_energy / centered.pow(2).sum()
+            rel_vis[layer, col] = relative_visibility(centered, unembed)
 
             probes["full"][layer, col] = probe_accuracy(x_tr, y_tr, x_te, y_te)
             probes["visible (5d)"][layer, col] = probe_accuracy(
@@ -197,7 +230,7 @@ def main() -> None:
             probes["dark (91d)"][layer, col] = probe_accuracy(
                 x_tr @ dark, y_tr, x_te @ dark, y_te
             )
-            for name in alt_probes:
+            for name in alt_probes:  # j = 1 is just g1 for all of these
                 alt_probes[name][layer, col] = probe_accuracy(
                     x_tr,
                     _labels(train, TARGETS[name], j),
@@ -211,12 +244,16 @@ def main() -> None:
     print(f"Chance = {CHANCE:.0%}; probes trained on {args.n_train}, tested on")
     print(f"{args.n_test} held-out examples; column t[j] = the <op> after operand j")
 
-    print_heatmap(lens_acc, "Logit lens top-1 = t[j]", col_labels=cols)
+    print_heatmap(lens_acc, "Logit lens top-1 = t[j] (whole vocab)", col_labels=cols)
+    print_heatmap(elem_top1, "Logit lens top-1 is an element token", col_labels=cols)
+    print_heatmap(
+        lens_elem_acc, "Logit lens top-1 = t[j] (element logits only)", col_labels=cols
+    )
     for name, acc in probes.items():
         print_heatmap(acc, f"Linear probe for t[j], {name} residual", col_labels=cols)
     print_heatmap(
-        chance_corrected_ratio(lens_acc, probes["full"]),
-        "Lens efficiency: (lens − chance) / (full probe − chance)",
+        chance_corrected_ratio(lens_elem_acc, probes["full"]),
+        "Lens efficiency: (element-only lens − chance) / (full probe − chance)",
         col_labels=cols,
         fmt=".2f",
     )
@@ -226,6 +263,14 @@ def main() -> None:
         f"(isotropic baseline {(N_ELEMENTS - 1) / config.dim:.1%})",
         col_labels=cols,
         fmt=".1%",
+    )
+    singular = torch.linalg.svdvals(unembed)[: N_ELEMENTS - 1]
+    print_heatmap(
+        rel_vis,
+        "Relative visibility: ‖W y‖²/‖y‖² over its isotropic expectation "
+        f"(W's singular values {', '.join(f'{v:.2f}' for v in singular)})",
+        col_labels=cols,
+        fmt=".2f",
     )
     for name, acc in alt_probes.items():
         print_heatmap(acc, f"Linear probe (full residual) for {name}", col_labels=cols)

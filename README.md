@@ -114,9 +114,10 @@ This downloads three checkpoints (Model A before and after phase 2, Model B;
 
 Not in the writeup: [`results/probe-lens-gap.md`](results/probe-lens-gap.md)
 compares the lens with linear probes (`lego.probe_lens_gap`, ~1 min per
-model). In Model A, intermediates the lens loses after their layer are still
-fully linearly decodable, just rotated out of the embedding directions. In
-Model B, nothing intermediate is linearly decodable at all.
+model). In Model A, the lens sees each intermediate at the same layer as a
+probe but recovers only 37–81% of the signal there, and after that layer the
+state stays fully linearly decodable while the lens reads chance. In Model B,
+no intermediate is linearly decodable at any position probed.
 
 Every number in the writeup's five tables reproduces exactly from these
 checkpoints (n = 500 examples and `--seed 999` for the lens
