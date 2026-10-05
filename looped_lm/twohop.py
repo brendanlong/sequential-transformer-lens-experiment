@@ -189,10 +189,12 @@ def load_data(
 
 @torch.no_grad()
 def collect(model: RecurrentGPT2, ids: Tensor, batch: int = 2048) -> Tensor:
-    """(layers, n, positions 1-2, dim) raw residuals."""
+    """(layers, n, positions 1-2, dim) raw residuals, on the CPU."""
     device = model.lm_head.weight.device
     chunks = [
-        torch.stack([r[:, 1:3] for r in model.residuals(ids[i : i + batch].to(device))])
+        torch.stack(
+            [r[:, 1:3].cpu() for r in model.residuals(ids[i : i + batch].to(device))]
+        )
         for i in range(0, len(ids), batch)
     ]
     return torch.cat(chunks, dim=1)
@@ -244,7 +246,7 @@ def analyse(args: argparse.Namespace) -> dict:
         row: dict = {"layer": layer, "targets": {}, "positions": {}}
         for name, (pos, field) in TARGETS.items():
             col = pos - 1
-            x_tr = normed(res_probe[layer, :, col])
+            x_tr = normed(res_probe[layer, :, col].to(device))
             y_tr = labels(probe_set, field)
             probes = {
                 "linear": lm.train_probe(x_tr, y_tr, len(entities), steps=args.steps),
@@ -262,7 +264,7 @@ def analyse(args: argparse.Namespace) -> dict:
                     )
             per_split = {}
             for split, ex in evals.items():
-                raw = res_eval[split][layer, :, col]
+                raw = res_eval[split][layer, :, col].to(device)
                 y = labels(ex, field)
                 logits = model.lens(raw)
                 z = normed(raw)
@@ -288,7 +290,7 @@ def analyse(args: argparse.Namespace) -> dict:
             row["targets"][name] = per_split
         for pos in (1, 2):
             split = "test_inferred_iid"
-            raw = res_eval[split][layer, :, pos - 1]
+            raw = res_eval[split][layer, :, pos - 1].to(device)
             z = normed(raw)
             zc = z - z.mean(0)
             r2, chosen = lm.omp_r2(zc, atoms, args.k_max)

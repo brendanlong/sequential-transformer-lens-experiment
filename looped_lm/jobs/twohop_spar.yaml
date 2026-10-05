@@ -1,0 +1,19 @@
+# The two-hop pipeline on SPAR, reusing the IFM env (a CUDA 12.8 torch that works
+# with its driver). Kohli data must already be in $GPUC_DATA_DIR/kohli.
+name: looped-lm-twohop-spar
+setup: bash looped_lm/jobs/ifm_env.sh && ln -sfn "$GPUC_DATA_DIR/looped-lm-ifm/env" ifm-env
+python: ifm-env/bin/python
+command: ifm-env/bin/snakemake -s looped_lm/Snakefile --cores 1 --config kohli_root="$GPUC_DATA_DIR/kohli" "twohop_checkpoints=[checkpoints/systematicity/r8_l4/checkpoint_epoch_71.pt,checkpoints/systematicity/r8_l4/checkpoint_epoch_301.pt,checkpoints/systematicity/r4_l4/checkpoint_epoch_41.pt,checkpoints/systematicity/r4_l4/checkpoint_epoch_401.pt,checkpoints/systematicity/r2_l4/checkpoint_epoch_7101.pt]"
+gpus: 1
+use_shared: true
+env:
+  PYTHONUNBUFFERED: "1"
+  OMP_NUM_THREADS: "8"
+secrets: [AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY]
+outputs:
+  - path: results/looped-lm
+    s3: s3://brendanlong-experiments/looped-lm/{job_id}/results
+sync_interval_s: 300
+priority: 90
+auto_preempt: true
+estimated_runtime_min: 60
