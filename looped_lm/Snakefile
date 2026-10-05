@@ -1,0 +1,77 @@
+# uv run --group looped snakemake -s looped_lm/Snakefile --cores 1 --resources gpu=1
+configfile: "looped_lm/config/default.yaml"
+
+KOHLI = config["kohli_root"]
+TWOHOP = config["twohop_checkpoints"]
+IFM_ROOT = config["ifm_root"]
+IFM_PYTHON = config["ifm_python"]
+IFM_MODELS = config["ifm_models"]
+IFM_ARGS = config["ifm_args"]
+
+
+def twohop_name(ckpt):
+    run, file = ckpt.split("/")[-2:]
+    return f"{run}_{file.removeprefix('checkpoint_epoch_').removesuffix('.pt')}"
+
+
+TWOHOP_BY_NAME = {twohop_name(c): c for c in TWOHOP}
+
+
+rule all:
+    input:
+        expand("results/looped-lm/twohop/{name}.json", name=TWOHOP_BY_NAME),
+
+
+rule ifm_all:
+    input:
+        expand("results/looped-lm/ifm/{model}.json", model=IFM_MODELS),
+
+
+# The manifest is the output, not the directory: Snakemake would add a timestamp
+# file to a directory output, and xLLM's loader rejects files not in the manifest.
+rule download_ifm:
+    output:
+        f"{IFM_ROOT}/{{model}}/artifact_manifest.json",
+    params:
+        dir=lambda wc: f"{IFM_ROOT}/{wc.model}",
+    shell:
+        "hf download IFM/LoopedLM-P1-{wildcards.model} --local-dir {params.dir}"
+
+
+rule ifm:
+    input:
+        f"{IFM_ROOT}/{{model}}/artifact_manifest.json",
+    output:
+        "results/looped-lm/ifm/{model}.json",
+    log:
+        "results/looped-lm/ifm/{model}.log",
+    params:
+        dir=lambda wc: f"{IFM_ROOT}/{wc.model}",
+    resources:
+        gpu=1,
+    shell:
+        "{IFM_PYTHON} -m looped_lm.ifm --artifact {params.dir} --out {output} {IFM_ARGS}"
+        " > {log} 2>&1"
+
+
+rule download_kohli:
+    output:
+        directory(f"{KOHLI}/checkpoints/systematicity"),
+        directory(f"{KOHLI}/data/composition.2000.200.7.2"),
+    shell:
+        "python -m looped_lm.download_kohli {KOHLI}"
+
+
+rule twohop:
+    input:
+        rules.download_kohli.output,
+    output:
+        json="results/looped-lm/twohop/{name}.json",
+        log="results/looped-lm/twohop/{name}.txt",
+    params:
+        ckpt=lambda wc: TWOHOP_BY_NAME[wc.name],
+    resources:
+        gpu=1,
+    shell:
+        "python -m looped_lm.twohop --root {KOHLI} --checkpoint {params.ckpt}"
+        " --out {output.json} > {output.log}"
