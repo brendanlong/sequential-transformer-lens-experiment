@@ -298,13 +298,15 @@ def twohop_table(runs: dict[str, dict], split: str) -> None:
         )
 
 
-def _window(rows: list[dict], frac: float, fn: object, half: int = 3) -> float:
-    """Mean of fn over executions within ±half of frac · depth.
+def _window(rows: list[dict], frac: float, fn: object) -> float:
+    """Mean of fn over executions within ±2.7% of depth around frac · depth.
 
-    A single execution can land on a loop boundary, where injection models
-    differ from their neighbours.
+    That is ±3 executions for the 112-deep models and ±1 for D28. A single
+    execution can land on a loop boundary, where injection models differ from
+    their neighbours.
     """
     depth = len(rows) - 1
+    half = round(3 * depth / 112)
     centre = round(frac * depth)
     sel = rows[max(centre - half, 0) : centre + half + 1]
     return sum(fn(r) for r in sel) / len(sel)  # type: ignore[operator]
@@ -312,7 +314,7 @@ def _window(rows: list[dict], frac: float, fn: object, half: int = 3) -> float:
 
 def ifm_table(runs: dict[str, dict]) -> None:
     fracs = (0.5, 0.75, 0.9)
-    print("\n### IFM (each cell: mean over ±3 executions)\n")
+    print("\n### IFM (each cell: mean over ±2.7% of depth)\n")
     print(
         "| Model | final next-token top-1 | lens = final top-1 at "
         "50% / 75% / 90% depth | ridge-tuned lens = final top-1 at 50% / 75% / 90% "

@@ -12,27 +12,27 @@ checkpoints/systematicity/r1_l8/checkpoint_epoch_61.pt (epoch 60, 8 layers x 1)
 
 bridge@r1 on train_inferred
   L      lens_top1 lens_entity_to label_in_outli   probe_linear  probe_readout probe_linear_t probe_linear_b
-  0             0%             0%             0%             1%             1%             1%             1%
-  1             0%             0%             0%            43%            36%            31%            32%
-  2             0%             1%             0%            46%            47%            46%            46%
-  3             0%             4%             0%            46%            47%            46%            46%
-  4             8%            18%             0%            47%            47%            47%            46%
-  5            36%            38%             0%            47%            50%            47%            47%
-  6            54%            55%             0%            47%            52%            48%            47%
-  7            68%            68%             2%            48%            55%            48%            47%
-  8            75%            75%             3%            48%             2%            47%            47%
+  0             0%             0%             0%             0%             0%             0%             0%
+  1             0%             0%             0%             0%             0%             0%             0%
+  2             0%             1%             0%             0%             0%             0%             0%
+  3             0%             3%             0%             0%             1%             0%             0%
+  4             7%            17%             0%             1%             2%             0%             0%
+  5            36%            38%             0%             1%             5%             1%             1%
+  6            55%            55%             0%             2%             8%             2%             1%
+  7            68%            68%             2%             2%            14%             3%             1%
+  8            75%            75%             3%             2%             2%             2%             1%
 
 bridge@r1 on test_inferred_iid
   L      lens_top1 lens_entity_to label_in_outli   probe_linear  probe_readout probe_linear_t probe_linear_b
-  0             0%             0%             0%             1%             1%             1%             1%
-  1             0%             0%             0%            38%            30%            27%            27%
-  2             0%             1%             0%            40%            40%            40%            40%
-  3             0%             3%             0%            40%            40%            40%            40%
-  4             8%            16%             0%            40%            41%            40%            40%
-  5            35%            38%             0%            41%            43%            40%            40%
-  6            55%            55%             0%            41%            47%            41%            40%
-  7            68%            68%             2%            41%            49%            42%            40%
-  8            74%            74%             3%            41%             2%            40%            40%
+  0             0%             0%             0%             0%             0%             0%             0%
+  1             0%             0%             0%             0%             0%             0%             0%
+  2             0%             1%             0%             0%             0%             0%             0%
+  3             0%             3%             0%             0%             0%             0%             0%
+  4             7%            15%             0%             0%             2%             0%             0%
+  5            36%            39%             0%             1%             4%             1%             1%
+  6            54%            55%             0%             1%             7%             1%             1%
+  7            69%            69%             2%             2%            13%             3%             1%
+  8            75%            75%             3%             2%             2%             2%             1%
 
 bridge@r1 on test_inferred_ood
   L      lens_top1 lens_entity_to label_in_outli   probe_linear  probe_readout probe_linear_t probe_linear_b
@@ -41,34 +41,34 @@ bridge@r1 on test_inferred_ood
   2             0%             0%             0%             0%             0%             0%             0%
   3             0%             0%             0%             0%             0%             0%             0%
   4             0%             0%             0%             0%             1%             0%             0%
-  5             4%             5%             0%             0%             1%             0%             0%
+  5             4%             5%             0%             0%             2%             0%             0%
   6            10%            11%             0%             0%             2%             0%             0%
-  7            21%            21%             0%             0%             4%             1%             0%
-  8            27%            27%             0%             0%             0%             0%             0%
+  7            21%            21%             0%             1%             4%             1%             0%
+  8            27%            27%             0%             0%             1%             1%             0%
 
 bridge@r2 on train_inferred
   L      lens_top1 lens_entity_to label_in_outli   probe_linear  probe_readout probe_linear_t probe_linear_b
-  0             0%             0%             0%             1%             1%             1%             1%
-  1             0%             0%             0%            17%            15%            14%            14%
-  2             0%             0%             0%            17%            13%            15%            16%
-  3             0%             0%             0%            16%            13%            15%            15%
-  4             0%             0%             0%            19%            14%            18%            18%
-  5             0%             0%             0%            28%            17%            25%            24%
-  6             0%             0%             0%            32%            19%            27%            26%
-  7             0%             0%             0%            33%            18%            28%            27%
-  8             0%             0%             0%            29%             0%            23%            23%
+  0             0%             0%             0%             0%             1%             1%             1%
+  1             0%             0%             0%             1%             1%             1%             1%
+  2             0%             0%             0%             1%             1%             1%             1%
+  3             0%             0%             0%             1%             1%             1%             1%
+  4             0%             0%             0%             3%             2%             2%             2%
+  5             0%             0%             0%             5%             3%             3%             4%
+  6             0%             0%             0%             6%             3%             5%             4%
+  7             0%             0%             0%             8%             4%             5%             4%
+  8             0%             0%             0%             7%             0%             6%             4%
 
 bridge@r2 on test_inferred_iid
   L      lens_top1 lens_entity_to label_in_outli   probe_linear  probe_readout probe_linear_t probe_linear_b
-  0             0%             0%             0%             1%             1%             1%             1%
-  1             0%             0%             0%            10%             6%             7%             8%
-  2             0%             0%             0%             9%             4%             8%             7%
-  3             0%             0%             0%             7%             4%             6%             6%
-  4             0%             1%             0%            11%             6%             9%            10%
-  5             1%             1%             0%            18%             8%            14%            14%
-  6             2%             2%             0%            20%             9%            15%            16%
-  7             1%             1%             0%            21%             9%            15%            16%
-  8             2%             2%             0%            17%             0%            11%            12%
+  0             0%             0%             0%             1%             0%             1%             1%
+  1             0%             0%             0%             0%             1%             1%             1%
+  2             0%             0%             0%             1%             1%             0%             1%
+  3             0%             0%             0%             1%             1%             1%             1%
+  4             0%             0%             0%             1%             1%             1%             1%
+  5             0%             1%             0%             3%             2%             3%             2%
+  6             1%             1%             0%             4%             2%             3%             2%
+  7             1%             1%             0%             3%             2%             2%             2%
+  8             2%             2%             0%             4%             0%             2%             3%
 
 bridge@r2 on test_inferred_ood
   L      lens_top1 lens_entity_to label_in_outli   probe_linear  probe_readout probe_linear_t probe_linear_b
@@ -85,23 +85,23 @@ bridge@r2 on test_inferred_ood
 target@r2 on train_inferred
   L      lens_top1 lens_entity_to label_in_outli   probe_linear  probe_readout
   0             0%             0%             0%             1%             1%
-  1             0%             0%             0%             8%             7%
-  2             0%             1%             0%             9%             9%
-  3             0%             3%             0%            10%            11%
-  4             1%            24%             0%            11%            15%
-  5            42%            67%             0%            16%            33%
-  6            89%            91%             5%            22%            51%
-  7            99%            99%            24%            32%            66%
-  8           100%           100%            47%            30%             0%
+  1             0%             0%             0%             1%             1%
+  2             0%             1%             0%             1%             1%
+  3             0%             3%             0%             1%             2%
+  4             1%            24%             0%             3%             7%
+  5            41%            66%             1%            10%            18%
+  6            89%            91%             6%            16%            34%
+  7            99%            99%            25%            25%            51%
+  8           100%           100%            48%            24%             1%
 
 target@r2 on test_inferred_iid
   L      lens_top1 lens_entity_to label_in_outli   probe_linear  probe_readout
   0             0%             0%             0%             1%             1%
-  1             0%             0%             0%             1%             1%
-  2             0%             0%             0%             0%             0%
-  3             0%             1%             0%             1%             0%
-  4             0%             1%             0%             1%             1%
-  5             0%             1%             0%             1%             1%
+  1             0%             0%             0%             0%             0%
+  2             0%             0%             0%             1%             0%
+  3             0%             1%             0%             0%             0%
+  4             0%             1%             0%             1%             0%
+  5             0%             1%             0%             1%             0%
   6             1%             1%             0%             1%             1%
   7             1%             1%             0%             1%             1%
   8             1%             1%             0%             1%             0%
@@ -123,19 +123,19 @@ position r1 (test ID): variance by singular band, visibility, OMP R²
   1 [35% 28% 21% 16%] vis=1.18 R2(k=1..4) model/null 0.71/0.04 0.71/0.07 0.71/0.09 0.72/0.11 | first atom head=0% r1=100% r2=0% bridge=0% tail=0% | outliers 1.0
   2 [24% 25% 26% 25%] vis=0.99 R2(k=1..4) model/null 0.26/0.02 0.27/0.03 0.28/0.05 0.29/0.06 | first atom head=0% r1=100% r2=0% bridge=0% tail=0% | outliers 1.0
   3 [19% 23% 27% 31%] vis=0.90 R2(k=1..4) model/null 0.07/0.01 0.08/0.03 0.09/0.04 0.10/0.05 | first atom head=0% r1=100% r2=0% bridge=0% tail=0% | outliers 0.9
-  4 [18% 22% 27% 33%] vis=0.88 R2(k=1..4) model/null 0.02/0.01 0.04/0.03 0.05/0.04 0.06/0.05 | first atom head=0% r1=69% r2=0% bridge=7% tail=0% | outliers 0.1
-  5 [18% 21% 26% 34%] vis=0.87 R2(k=1..4) model/null 0.02/0.01 0.03/0.03 0.04/0.04 0.05/0.05 | first atom head=0% r1=11% r2=0% bridge=39% tail=0% | outliers 0.0
+  4 [18% 22% 27% 33%] vis=0.88 R2(k=1..4) model/null 0.02/0.01 0.04/0.03 0.05/0.04 0.06/0.05 | first atom head=0% r1=68% r2=0% bridge=7% tail=0% | outliers 0.1
+  5 [18% 21% 26% 34%] vis=0.87 R2(k=1..4) model/null 0.02/0.01 0.03/0.03 0.04/0.04 0.05/0.05 | first atom head=0% r1=11% r2=0% bridge=38% tail=0% | outliers 0.0
   6 [17% 21% 26% 36%] vis=0.84 R2(k=1..4) model/null 0.02/0.01 0.03/0.02 0.04/0.03 0.05/0.04 | first atom head=0% r1=1% r2=0% bridge=61% tail=0% | outliers 0.0
   7 [16% 20% 26% 39%] vis=0.81 R2(k=1..4) model/null 0.02/0.01 0.03/0.02 0.05/0.03 0.06/0.04 | first atom head=0% r1=0% r2=0% bridge=72% tail=0% | outliers 0.0
   8 [16% 20% 26% 39%] vis=0.81 R2(k=1..4) model/null 0.02/0.01 0.04/0.02 0.05/0.03 0.06/0.04 | first atom head=0% r1=0% r2=0% bridge=77% tail=0% | outliers 0.0
 
 position r2 (test ID): variance by singular band, visibility, OMP R²
   0 [46% 29% 17% 9%] vis=1.34 R2(k=1..4) model/null 0.99/0.05 0.99/0.09 0.99/0.12 0.99/0.15 | first atom head=0% r1=0% r2=100% bridge=0% tail=0% | outliers 1.0
-  1 [36% 28% 21% 15%] vis=1.19 R2(k=1..4) model/null 0.75/0.04 0.75/0.07 0.75/0.09 0.76/0.11 | first atom head=0% r1=0% r2=100% bridge=0% tail=0% | outliers 1.0
+  1 [36% 28% 21% 15%] vis=1.19 R2(k=1..4) model/null 0.74/0.04 0.75/0.07 0.75/0.09 0.76/0.11 | first atom head=0% r1=0% r2=100% bridge=0% tail=0% | outliers 1.0
   2 [27% 26% 24% 23%] vis=1.04 R2(k=1..4) model/null 0.39/0.02 0.40/0.04 0.41/0.06 0.42/0.07 | first atom head=0% r1=0% r2=100% bridge=0% tail=0% | outliers 1.0
   3 [22% 24% 26% 28%] vis=0.94 R2(k=1..4) model/null 0.15/0.02 0.17/0.03 0.18/0.04 0.19/0.05 | first atom head=0% r1=0% r2=100% bridge=0% tail=0% | outliers 1.0
   4 [21% 23% 26% 30%] vis=0.92 R2(k=1..4) model/null 0.05/0.01 0.07/0.03 0.08/0.04 0.09/0.05 | first atom head=0% r1=0% r2=100% bridge=0% tail=0% | outliers 0.7
-  5 [20% 22% 26% 32%] vis=0.90 R2(k=1..4) model/null 0.02/0.01 0.04/0.03 0.05/0.04 0.06/0.05 | first atom head=0% r1=0% r2=62% bridge=0% tail=0% | outliers 0.0
-  6 [19% 22% 25% 34%] vis=0.88 R2(k=1..4) model/null 0.02/0.01 0.03/0.03 0.04/0.04 0.05/0.05 | first atom head=0% r1=0% r2=11% bridge=1% tail=1% | outliers 0.0
-  7 [17% 20% 25% 37%] vis=0.83 R2(k=1..4) model/null 0.02/0.01 0.03/0.02 0.04/0.03 0.05/0.04 | first atom head=0% r1=0% r2=0% bridge=2% tail=1% | outliers 0.0
-  8 [17% 21% 25% 37%] vis=0.84 R2(k=1..4) model/null 0.02/0.01 0.03/0.02 0.04/0.03 0.05/0.04 | first atom head=0% r1=0% r2=0% bridge=2% tail=1% | outliers 0.0
+  5 [20% 22% 26% 32%] vis=0.90 R2(k=1..4) model/null 0.02/0.01 0.04/0.03 0.05/0.04 0.06/0.05 | first atom head=0% r1=0% r2=63% bridge=0% tail=0% | outliers 0.0
+  6 [19% 22% 25% 34%] vis=0.88 R2(k=1..4) model/null 0.02/0.01 0.03/0.03 0.04/0.04 0.05/0.05 | first atom head=0% r1=0% r2=10% bridge=1% tail=1% | outliers 0.0
+  7 [17% 20% 25% 38%] vis=0.83 R2(k=1..4) model/null 0.02/0.01 0.03/0.02 0.04/0.03 0.05/0.04 | first atom head=0% r1=0% r2=0% bridge=1% tail=1% | outliers 0.0
+  8 [17% 20% 25% 37%] vis=0.84 R2(k=1..4) model/null 0.02/0.01 0.03/0.02 0.04/0.03 0.05/0.04 | first atom head=0% r1=0% r2=0% bridge=1% tail=1% | outliers 0.0
