@@ -298,6 +298,115 @@ def twohop_table(runs: dict[str, dict], split: str) -> None:
         )
 
 
+def _window(rows: list[dict], frac: float, fn: object, half: int = 3) -> float:
+    """Mean of fn over executions within ±half of frac · depth.
+
+    A single execution can land on a loop boundary, where injection models
+    differ from their neighbours.
+    """
+    depth = len(rows) - 1
+    centre = round(frac * depth)
+    sel = rows[max(centre - half, 0) : centre + half + 1]
+    return sum(fn(r) for r in sel) / len(sel)  # type: ignore[operator]
+
+
+def ifm_table(runs: dict[str, dict]) -> None:
+    fracs = (0.5, 0.75, 0.9)
+    print("\n### IFM (each cell: mean over ±3 executions)\n")
+    print(
+        "| Model | final next-token top-1 | lens = final top-1 at "
+        "50% / 75% / 90% depth | ridge-tuned lens = final top-1 at 50% / 75% / 90% "
+        "| KL lens / tuned at 75% (nats) | raw energy in weakest quarter at 50% "
+        "| OMP R²(1) − null, peak |"
+    )
+    print("|---|---|---|---|---|---|---|")
+    for name, label in IFM_NAMES.items():
+        if name not in runs:
+            continue
+        rows = runs[name]["rows"]
+        depth = len(rows) - 1
+
+        def w(frac: float, fn: object, rows: list = rows) -> float:
+            return _window(rows, frac, fn)
+
+        lens = " / ".join(
+            f"{w(f, lambda r: r['lens']['agree_final_top1']):.0%}" for f in fracs
+        )
+        tuned = " / ".join(
+            f"{w(f, lambda r: r['tuned_ridge']['agree_final_top1']):.0%}" for f in fracs
+        )
+        kl = (
+            f"{w(0.75, lambda r: r['lens']['kl_to_final']):.1f} / {w(0.75, lambda r: r[
+                    'tuned_ridge'
+                ]['kl_to_final']):.1f}"
+        )
+        dark = w(0.5, lambda r: r["energy_bands_raw"][-1])
+        peak = max(rows, key=lambda r: r["omp_r2"][0] - r["omp_r2_null"][0])
+        excess = peak["omp_r2"][0] - peak["omp_r2_null"][0]
+        print(
+            f"| {label} | {rows[-1]['lens']['next_token_top1']:.1%} | {lens} | {tuned} "
+            f"| {kl} | {dark:.0%} | {excess:.3f} at {peak['execution'] / depth:.0%} |"
+        )
+    print("\nLens = final top-1 just before / after each Ouro loop boundary:\n")
+    for name in ("dense-ouro-336b", "dense-ouro-raw-injection-336b"):
+        if name in runs:
+            rows = runs[name]["rows"]
+            cells = ", ".join(
+                f"{rows[e]['lens']['agree_final_top1']:.0%} → "
+                f"{rows[e + 1]['lens']['agree_final_top1']:.0%}"
+                for e in (28, 56, 84)
+            )
+            print(f"- {IFM_NAMES[name]}: {cells}")
+    print("\nFirst depth (5% steps, window means) from which both standard models")
+    print("beat every looped model at every later step:")
+    standard = ("dense-d112-336b", "dense-d28-336b")
+    looped = [n for n in IFM_NAMES if n not in standard and n in runs]
+    for key in ("lens", "tuned_ridge"):
+        first = None
+        for step in range(1, 20):
+            frac = step / 20
+
+            def agree(r: dict, key: str = key) -> float:
+                return r[key]["agree_final_top1"]
+
+            lo = min(_window(runs[n]["rows"], frac, agree) for n in standard)
+            hi = max(_window(runs[n]["rows"], frac, agree) for n in looped)
+            if lo > hi and first is None:
+                first = frac
+            elif lo <= hi:
+                first = None
+        print(f"- {key}: {first}")
+
+
+def twohop_omp_summary(runs: dict[str, dict]) -> None:
+    """Middle-half-of-depth OMP statistics at r1 and r2 on test ID."""
+    print("\n### Two-hop OMP, middle half of depth (layers at 25 to 75% of depth)\n")
+    print(
+        "| Model | r1: R²(1) − null | r1: first atom = bridge | "
+        "r2: R²(1) − null | r2: first atom = answer |"
+    )
+    print("|---|---|---|---|---|")
+    for name, label in TWOHOP_ALL.items():
+        if name not in runs or "train" in label:
+            continue
+        layers = runs[name]["layers"]
+        depth = len(layers) - 1
+        mid = [r for r in layers if 0.25 <= r["layer"] / depth <= 0.75]
+
+        def mean(pos: str, fn: object, mid: list = mid) -> float:
+            return sum(fn(r["positions"][pos]) for r in mid) / len(mid)  # type: ignore[operator]
+
+        def excess(p: dict) -> float:
+            return p["omp_r2"][0] - p["omp_r2_null"][0]
+
+        print(
+            f"| {label} | {mean('r1', excess):.2f} "
+            f"| {mean('r1', lambda p: p['omp_first_atom']['bridge']):.0%} "
+            f"| {mean('r2', excess):.2f} "
+            f"| {mean('r2', lambda p: p['omp_first_atom']['tail']):.0%} |"
+        )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=(__doc__ or "").split("\n\n")[0])
     parser.add_argument("results", type=Path)
@@ -310,9 +419,11 @@ def main() -> None:
         twohop_geometry(twohop, figures / "twohop-geometry.png")
         for split in SPLIT_NAMES:
             twohop_table(twohop, split)
+        twohop_omp_summary(twohop)
     ifm = load(args.results / "ifm", IFM_NAMES)
     if ifm:
         ifm_figure(ifm, figures / "ifm.png")
+        ifm_table(ifm)
 
 
 if __name__ == "__main__":

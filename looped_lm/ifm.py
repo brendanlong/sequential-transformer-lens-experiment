@@ -137,12 +137,18 @@ def rms_normed(x: Tensor, eps: float) -> Tensor:
     return x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + eps)
 
 
-def ridge(x: Tensor, y: Tensor, rel_lambda: float = 1e-3) -> Tensor:
-    """argmin_A ‖x A − y‖² + λ‖A‖², λ = rel_lambda · tr(xᵀx)/dim."""
-    gram = x.T.double() @ x.double()
+def ridge(x: Tensor, y: Tensor, rel_lambda: float = 1e-3) -> tuple[Tensor, Tensor]:
+    """(A, b) minimising ‖x A + b − y‖² + λ‖A‖², λ = rel_lambda · tr(x̃ᵀx̃)/dim.
+
+    x̃ is x centered; the intercept is not penalised.
+    """
+    x_mean, y_mean = x.double().mean(0), y.double().mean(0)
+    xc, yc = x.double() - x_mean, y.double() - y_mean
+    gram = xc.T @ xc
     lam = rel_lambda * gram.trace() / gram.shape[0]
     eye = torch.eye(gram.shape[0], dtype=gram.dtype, device=gram.device)
-    return torch.linalg.solve(gram + lam * eye, x.T.double() @ y.double()).float()
+    a = torch.linalg.solve(gram + lam * eye, xc.T @ yc)
+    return a.float(), (y_mean - x_mean @ a).float()
 
 
 @torch.no_grad()
@@ -221,22 +227,25 @@ def analyse(args: argparse.Namespace) -> dict:
     )
     final_top1 = final_logp.argmax(-1)
     generator = torch.Generator().manual_seed(args.seed)
+    # Spread over every evaluation document rather than the first few.
+    omp_rows = torch.randperm(len(z_final_eval), generator=generator)[: args.n_omp]
+    omp_rows = omp_rows.sort().values.to(device)
 
     rows = []
     for layer in range(flat.shape[0]):
         z_train = rms_normed(flat[layer, :split].to(device), eps)
         z_eval = rms_normed(flat[layer, split:].to(device), eps)
-        translator = ridge(z_train, z_final_train)
+        a, b = ridge(z_train, z_final_train)
         lens = lens_stats(logits_from_z, z_eval, final_logp, next_eval, args.chunk)
         tuned = lens_stats(
-            lambda z, a=translator: logits_from_z(z @ a),
+            lambda z, a=a, b=b: logits_from_z(z @ a + b),
             z_eval,
             final_logp,
             next_eval,
             args.chunk,
         )
         zc = z_eval - z_eval.mean(0)
-        sub = zc[: args.n_omp]
+        sub = zc[omp_rows]
         r2, chosen = lm.omp_r2(sub, atoms, args.k_max)
         r2_null, _ = lm.omp_r2(lm.gaussian_null(sub, generator), atoms, args.k_max)
         first = chosen[:, 0]
@@ -259,18 +268,12 @@ def analyse(args: argparse.Namespace) -> dict:
                 "omp_r2": r2.tolist(),
                 "omp_r2_null": r2_null.tolist(),
                 "omp_first_atom": {
-                    "current_token": (first == cur_eval[: args.n_omp])
+                    "current_token": (first == cur_eval[omp_rows])
                     .float()
                     .mean()
                     .item(),
-                    "next_token": (first == next_eval[: args.n_omp])
-                    .float()
-                    .mean()
-                    .item(),
-                    "final_top1": (first == final_top1[: args.n_omp])
-                    .float()
-                    .mean()
-                    .item(),
+                    "next_token": (first == next_eval[omp_rows]).float().mean().item(),
+                    "final_top1": (first == final_top1[omp_rows]).float().mean().item(),
                 },
                 "outliers_mean": outliers.float().mean().item(),
                 "outliers_median": outliers.float().median().item(),

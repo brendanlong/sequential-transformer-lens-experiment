@@ -65,8 +65,9 @@ def energy_by_singular_band(z: Tensor, vh: Tensor, n_bands: int = 4) -> Tensor:
     """Share of Σ‖z‖² in each band of singular directions, top band first.
 
     Bands split ``vh``'s rows into equal-sized groups by singular value; an
-    isotropic ``z`` puts 1/n_bands of its energy in each (directions outside
-    the readout's row space, e.g. all-ones for LayerNorm, count in none).
+    isotropic ``z`` puts 1/n_bands of its energy in each. Null directions of
+    the readout (all-ones for LayerNorm) land in the bottom band, but a
+    LayerNorm-normed ``z`` has no component there.
     """
     coords = z.float() @ vh.T
     per_dir = coords.pow(2).sum(0)
@@ -158,6 +159,7 @@ def train_probe(
         probe = torch.nn.Linear(dim, n_classes).to(x_train.device)
     else:
         probe = _ReadoutProbe(readout.float()).to(x_train.device)
+        weight_decay = 0.0  # decay would pull A toward 0, not its identity start
     opt = torch.optim.Adam(probe.parameters(), lr=lr, weight_decay=weight_decay)
     for _ in range(steps):
         opt.zero_grad()

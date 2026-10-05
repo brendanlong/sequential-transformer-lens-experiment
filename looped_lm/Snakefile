@@ -41,6 +41,9 @@ rule download_ifm:
 rule ifm:
     input:
         f"{IFM_ROOT}/{{model}}/artifact_manifest.json",
+        "looped_lm/ifm.py",
+        "looped_lm/lens_metrics.py",
+        "looped_lm/xllm_compat.py",
     output:
         "results/looped-lm/ifm/{model}.json",
     log:
@@ -50,7 +53,7 @@ rule ifm:
     resources:
         gpu=1,
     shell:
-        "{IFM_PYTHON} -m looped_lm.ifm --artifact {params.dir} --out {output} {IFM_ARGS}"
+        "{IFM_PYTHON} -m looped_lm.ifm --artifact {params.dir} --out {output[0]} {IFM_ARGS}"
         " > {log} 2>&1"
 
 
@@ -65,6 +68,8 @@ rule download_kohli:
 rule twohop:
     input:
         rules.download_kohli.output,
+        "looped_lm/twohop.py",
+        "looped_lm/lens_metrics.py",
     output:
         json="results/looped-lm/twohop/{name}.json",
         log="results/looped-lm/twohop/{name}.txt",

@@ -177,13 +177,16 @@ def load_data(
         )
 
     rng = random.Random(seed)
-    composed = [x for x in train if len(x) == 4]
-    probe_set = examples(rng.sample(composed, n_probe))
     test = json.loads((data / "test.json").read_text())
     evals = {}
     for split in SPLITS:
         rows = [parse(x) for x in test if x["type"] == split]
         evals[split] = examples(rng.sample(rows, min(n_eval, len(rows))))
+    # The residual at r1 depends only on (h, r1): a probe trained on a
+    # composition sharing an evaluation example's (h, r1) has seen its input.
+    held_out = {(h, r1) for ex in evals.values() for h, r1 in ex.ids[:, :2].tolist()}
+    composed = [x for x in train if len(x) == 4 and (x[0], x[1]) not in held_out]
+    probe_set = examples(rng.sample(composed, n_probe))
     return vocab, probe_set, evals
 
 
@@ -262,7 +265,12 @@ def analyse(args: argparse.Namespace) -> dict:
                             x_tr @ basis.T, y_tr, len(entities), steps=args.steps
                         ),
                     )
-            per_split = {}
+            per_split: dict = {
+                "probe_train": {
+                    f"probe_{k}": lm.probe_accuracy(p, x_tr, y_tr)
+                    for k, p in probes.items()
+                }
+            }
             for split, ex in evals.items():
                 raw = res_eval[split][layer, :, col].to(device)
                 y = labels(ex, field)
