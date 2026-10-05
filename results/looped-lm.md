@@ -9,8 +9,9 @@ same data:
 - **Two-hop composition** (Kohli et al. 2026, [Loop, Think &
   Generalize](https://arxiv.org/abs/2604.07822)). GPT-2 blocks, width 768,
   answer-only loss, a 2,000-entity knowledge graph. The input is `<h><r1><r2>`,
-  the answer is `t = r2(r1(h))`, and the *bridge* `b = r1(h)` is a vocabulary
-  token that is never a training target. `r<R>_l<L>` is an L-layer stack run R
+  the answer is `t = r2(r1(h))`, and the *bridge* `b = r1(h)` is an entity
+  token the model is trained to output for the one-hop question `<h><r1>`, but
+  never as part of a two-hop question. `r<R>_l<L>` is an L-layer stack run R
   times; `r2_l4` and the vanilla `r1_l8` have the same depth and FLOPs. On
   held-out compositions of *seen* facts ("test ID") both solve the task through
   the bridge; only looped models eventually generalise to compositions of facts
@@ -34,34 +35,33 @@ printed by `uv run python -m looped_lm.report results/looped-lm`.
 
 ## Summary
 
-- **Two-hop: in the depth-matched pair, the looped model's bridge becomes
-  lens-readable sooner after it becomes linearly decodable.** Both the vanilla
-  8-layer model and its looped 4×2 twin have the bridge at the first relation
-  linearly decodable from L3; the lens reads it from L7 in the vanilla model and
-  from L5 in the looped one. With 4 or 8 iterations (ID stage) the lens reads
-  it as soon as a probe does, and it stays readable to the last layer.
-  Mid-depth, one token direction — the bridge — explains about half the
-  variance of the looped (×4, ×8) residual there, against 3% in the vanilla
-  8-layer model. This rests on one run per configuration, and the lag also
-  varies with training stage and with depth (the 4-layer vanilla model lags by
-  one layer), so it is suggestive rather than settled.
-- **The copy of the bridge the second hop uses is dark in every model.** At
-  the second relation the bridge is 91–100% linearly decodable (ID stage) and
-  at most 2% lens-readable in all 13 checkpoints, looped or not, and not
-  because it sits in weakly read directions.
-- **Language models (same 336B tokens and recipe): looping does not help.**
-  From 75% of depth on, both standard models are more lens- and
-  tuned-lens-readable than every loop design, and the prelude–loop–coda models
-  (8 iterations) are usually the two least readable; loop boundaries carry no readable
-  intermediate prediction (re-injecting the input makes it *less* readable). In
-  all six, most of the normed residual's raw energy sits in the most weakly read
-  quarter of directions, and the token-varying part is never close to a few
-  token directions.
+Report page: https://looped-lens-a783c534.surge.sh (built by
+`looped_lm/build_html_report.py`).
 
-So on a small algorithmic task where both models use the same algorithm the
-logit lens may favour weight sharing, but the effect does not carry over to the
-language-model suite, and in neither family does looping make the *consumed*
-intermediate state visible.
+The question is whether looping makes the **logit lens** show the intermediate
+state the model actually uses. A causal test checks whether what the lens
+shows is what the model reads; a probe checks what the lens misses.
+
+- **Two-hop task: yes, once the model loops enough or trains long enough.** In
+  the 4- and 8-iteration models, and in the 2-iteration model at its OOD stage,
+  the lens shows the bridge at 100% during the layers where the second hop
+  reads it from the first relation's position, and swapping only the
+  lens-visible component onto another entity redirects 56–100% of answers;
+  removing it drops accuracy to 1–73%.
+- **Standard models: no.** The second hop reads the bridge at L2–L3 (8 layers)
+  or L1 (4 layers), when the lens shows it 17% / 0% of the time, and swapping
+  the lens-visible component redirects 0%. The lens reads the bridge only later
+  (from L7 in the 8-layer model), after it has been used; at that position the
+  model is also answering the trained one-hop fact `<h><r1>`, which is what the
+  lens shows.
+- **Looping alone isn't enough:** the 2-iteration model at its ID stage
+  behaves like the standard ones (1%).
+- **Language models (IFM): no advantage.** From 75% of depth on, both standard
+  models are more lens-readable than every loop design. There is no known
+  intermediate there, so no causal test.
+- Caveats: one run per configuration, stage- (not step-) matched two-hop
+  checkpoints, one task — and the most favourable one for the lens, since the
+  intermediate is also a trained output token.
 
 ## Measurements
 
@@ -91,7 +91,41 @@ At every effective layer (every block *execution* for looped models):
   against a Gaussian null with the same covariance; plus which token OMP picks
   first.
 
-## Two-hop results
+## Two-hop causal test
+
+`looped_lm/twohop_causal.py`, 1,000 held-out compositions of seen facts per
+checkpoint. At the first relation's position, after one layer, edit the
+residual and let the model run on; for each example the counterfactual bridge
+`b'` is another entity with relation `r2`, so `r2(b')` exists and differs:
+
+- **whole-state swap**: the residual from a question whose bridge is `b'`.
+  Where this redirects the answer to `r2(b')`, the second hop is reading the
+  bridge from this position at this layer ("read window").
+- **lens-visible swap**: move only the component along the bridge's readout
+  direction onto `b'`'s (the part the logit lens reads).
+- **removal**: project that component out.
+- **strong push**: add `b'`'s direction with the residual's own norm.
+
+| Model | answer acc. | layers where the model reads the bridge | lens shows it there | lens-visible swap redirects | lens-visible part removed: accuracy | strong token push redirects (any layer) |
+|---|---|---|---|---|---|---|
+| standard 8L | 98% | L2–L3 | 17% | 0% | 98% | 1% |
+| standard 4L | 98% | L1 | 0% | 0% | 98% | 1% |
+| looped 4×2, ID stage | 99% | L1–L3 | 59% | 1% | 96% | 48% |
+| looped 4×2, OOD stage | 100% | L1–L4 | 100% | 98% | 73% | 99% |
+| looped 4×4, ID stage | 99% | L3–L6 | 100% | 56% | 37% | 98% |
+| looped 4×4, OOD stage | 100% | L2–L5 | 100% | 98% | 17% | 100% |
+| looped 4×8, ID stage | 98% | L2–L12 | 100% | 56% | 62% | 97% |
+| looped 4×8, OOD stage | 100% | L2–L17 | 100% | 100% | 1% | 100% |
+
+The second hop reads the bridge from the first relation's position (the
+whole-state swap redirects ≥ 50% of answers in the window above, and nothing
+after it). In the standard models the lens can't see it then and the part it
+sees isn't used. In the more-looped and OOD-stage models the lens sees it at
+100% inside the window and that part is causal. The strong push works for
+looped models even when the natural component isn't yet used, and never for
+standard ones: the looped second hop is built to read token directions.
+
+## Two-hop readout results
 
 ![Lens vs probe on the two-hop models](looped-lm/figures/twohop-lens-vs-probe.png)
 

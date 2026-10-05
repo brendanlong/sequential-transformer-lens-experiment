@@ -28,6 +28,7 @@ import argparse
 import json
 import random
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -116,14 +117,24 @@ class RecurrentGPT2(nn.Module):
         self.lm_head = nn.Linear(dim, vocab, bias=False)
         self.lm_head.weight = self.token_embedding.weight
 
-    def residuals(self, ids: Tensor) -> list[Tensor]:
-        """Residual stream after the embeddings and after every block execution."""
+    def residuals(
+        self, ids: Tensor, edit: Callable[[int, Tensor], Tensor] | None = None
+    ) -> list[Tensor]:
+        """Residual stream after the embeddings and after every block execution.
+
+        ``edit(layer, x)``, if given, replaces the residual at each effective
+        layer (0 = embeddings) before the model continues from it.
+        """
         pos = torch.arange(ids.shape[1], device=ids.device)
         x = self.token_embedding(ids) + self.position_embedding(pos)
+        if edit is not None:
+            x = edit(0, x)
         out = [x]
         for _ in range(self.n_iterations):
             for block in self.blocks:
                 x = block(x)
+                if edit is not None:
+                    x = edit(len(out), x)
                 out.append(x)
         return out
 
@@ -153,6 +164,17 @@ class Examples:
     tail: Tensor
 
 
+def parse_tokens(item: dict, vocab: dict[str, int]) -> list[int]:
+    return [vocab[t] for t in TOKEN.findall(item["target_text"]) if t != "</a>"]
+
+
+def load_atomic(root: Path, vocab: dict[str, int]) -> dict[tuple[int, int], int]:
+    """Every atomic fact (h, r) -> t; all are in the training set."""
+    rows = json.loads((root / DATA / "train.json").read_text())
+    parsed = (parse_tokens(x, vocab) for x in rows)
+    return {(h, r): t for h, r, t in (x for x in parsed if len(x) == 3)}
+
+
 def load_data(
     root: Path, n_probe: int, n_eval: int, seed: int
 ) -> tuple[dict[str, int], Examples, dict[str, Examples]]:
@@ -164,7 +186,7 @@ def load_data(
     vocab = {tok: i for i, tok in enumerate(tokens)}
 
     def parse(item: dict) -> list[int]:
-        return [vocab[t] for t in TOKEN.findall(item["target_text"]) if t != "</a>"]
+        return parse_tokens(item, vocab)
 
     train = [parse(x) for x in json.loads((data / "train.json").read_text())]
     atomic = {(h, r): t for h, r, t in (x for x in train if len(x) == 3)}

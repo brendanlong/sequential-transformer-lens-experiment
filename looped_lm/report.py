@@ -339,8 +339,8 @@ def ifm_table(runs: dict[str, dict]) -> None:
         )
         kl = (
             f"{w(0.75, lambda r: r['lens']['kl_to_final']):.1f} / {w(0.75, lambda r: r[
-                    'tuned_ridge'
-                ]['kl_to_final']):.1f}"
+                        'tuned_ridge'
+                    ]['kl_to_final']):.1f}"
         )
         dark = w(0.5, lambda r: r["energy_bands_raw"][-1])
         peak = max(rows, key=lambda r: r["omp_r2"][0] - r["omp_r2_null"][0])

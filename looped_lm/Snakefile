@@ -20,6 +20,7 @@ TWOHOP_BY_NAME = {twohop_name(c): c for c in TWOHOP}
 rule all:
     input:
         expand("results/looped-lm/twohop/{name}.json", name=TWOHOP_BY_NAME),
+        expand("results/looped-lm/twohop-causal/{name}.json", name=TWOHOP_BY_NAME),
 
 
 rule ifm_all:
@@ -80,3 +81,20 @@ rule twohop:
     shell:
         "python -m looped_lm.twohop --root {KOHLI} --checkpoint {params.ckpt}"
         " --out {output.json} > {output.log}"
+
+rule twohop_causal:
+    input:
+        rules.download_kohli.output,
+        "looped_lm/twohop.py",
+        "looped_lm/twohop_causal.py",
+    output:
+        json="results/looped-lm/twohop-causal/{name}.json",
+        log="results/looped-lm/twohop-causal/{name}.txt",
+    params:
+        ckpt=lambda wc: TWOHOP_BY_NAME[wc.name],
+    resources:
+        gpu=1,
+    shell:
+        "python -m looped_lm.twohop_causal --root {KOHLI} --checkpoint {params.ckpt}"
+        " --out {output.json} > {output.log}"
+
