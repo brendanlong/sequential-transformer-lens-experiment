@@ -52,7 +52,7 @@ printed by `uv run python -m looped_lm.report results/looped-lm`.
 - **Language models (same 336B tokens and recipe): looping does not help.**
   From 75% of depth on, both standard models are more lens- and
   tuned-lens-readable than every loop design, and the prelude–loop–coda models
-  (8 iterations) are usually the least readable of all; loop boundaries carry no readable
+  (8 iterations) are usually the two least readable; loop boundaries carry no readable
   intermediate prediction (re-injecting the input makes it *less* readable). In
   all six, most of the normed residual's raw energy sits in the most weakly read
   quarter of directions, and the token-varying part is never close to a few
@@ -75,8 +75,10 @@ At every effective layer (every block *execution* for looped models):
   linear probe on the normed residual, trained on 20,000 training compositions
   that share no (h, r1) with any evaluation example (the residual at `r1`
   depends only on that pair, so otherwise the probe would have seen 40% of the
-  test inputs). A probe through the frozen unembedding agrees with it within
-  0.3 points at the median. LMs: a ridge-regression map (with intercept) from
+  test inputs). A probe through the frozen unembedding (an affine map into the
+  readout) agrees with it within 0.4 points at the median, but its optimisation
+  sometimes fails (up to 38 points lower on train-stage checkpoints), so only
+  the linear probe is quoted. LMs: a ridge-regression map (with intercept) from
   each layer's normed residual to the final one, read out through the model's
   head — a closed-form tuned lens; at the final layer it agrees with the model
   on 99–100% of tokens.
@@ -95,7 +97,7 @@ At every effective layer (every block *execution* for looped models):
 
 Test ID (held-out compositions of seen facts), 2,000 examples. "Probe ≥ 90%
 / lens ≥ 90%" is the first layer at which each reaches 90% top-1 (L0 =
-embeddings); train and test-OOD versions are in
+embeddings); train and test-OOD versions, and the OMP table, are in
 [looped-lm/twohop-tables.md](looped-lm/twohop-tables.md).
 
 | Model | answer acc. | bridge@r1: probe ≥ 90% / lens ≥ 90% | bridge@r1 lens: peak / last layer | target@r2: probe ≥ 90% / lens ≥ 90% | bridge@r2: best probe / best lens |
@@ -163,7 +165,7 @@ of depth:
    49–77 at the OOD stage) and it is the bridge for 72–100% of examples. In
    the vanilla 8-layer model it explains 3 points (though it is still the
    bridge for 43% of examples); its residual is not near any token until the
-   last layer (≈ 45). Where token content is present R²(k) is flat after
+   last layer (≈ 0.42). Where token content is present R²(k) is flat after
    k = 1: one token, not a handful. At `r2` mid-depth the first token picked is
    the eventual answer in 20–64% of examples, and explains 8–37 points.
 6. The token-varying part of the residual has relative visibility ≈ 1 through
@@ -197,9 +199,9 @@ boundary.
    prediction actually forms, both standard models lead every looped model on
    both the logit lens and the ridge-tuned lens (at 90% depth: lens 33–34% vs
    11–22%, tuned 67% vs 47–61%). The prelude–loop–coda models, which loop more
-   (8 iterations of 12 blocks), are the least readable of the six from ~65% of
-   depth on, except around 85% where the Ouro model with injection dips below
-   them.
+   (8 iterations of 12 blocks), are the two least readable of the six from
+   ~65% of depth on, except around 85% where the Ouro model with injection dips
+   below one of them.
    The final models are within 3 points of each other on next-token accuracy.
 2. **No readout at loop boundaries.** The plain Ouro-style model's state at the
    end of loops 1–3 is the output of the very block that feeds the head, yet
