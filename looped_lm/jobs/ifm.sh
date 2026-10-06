@@ -8,4 +8,4 @@ export PYTHONPATH="$PWD:$IFM_HOME/xllm-loop"
 export PATH="$IFM_HOME/env/bin:$PATH"
 export HF_HUB_OFFLINE=0 HF_DATASETS_OFFLINE=0  # checkpoints and text stream from the Hub
 snakemake -s looped_lm/Snakefile --cores 1 --resources gpu=1 \
-    --config ifm_root="$IFM_HOME/checkpoints" ifm_python=python "$@" -- ifm_all
+    --config ifm_root="$IFM_HOME/checkpoints" ifm_python=python "$@" -- ${TARGETS:-ifm_all}

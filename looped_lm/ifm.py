@@ -62,6 +62,13 @@ def load_text_tokens(tokenizer: object, n_seq: int, seq_len: int) -> Tensor:
     return torch.tensor(rows)
 
 
+def _to_device(device: torch.device):  # noqa: ANN202
+    def hook(mod: nn.Module, _args: object) -> None:
+        mod.to(device)  # returns the module, which a pre-hook must not return
+
+    return hook
+
+
 class Recorder:
     """Forward hooks that keep every block execution's output at chosen positions."""
 
@@ -72,9 +79,7 @@ class Recorder:
         self.handles = [model.embed.register_forward_hook(self._embed_hook)]
         for i, layer in enumerate(model.layers):
             if offload:
-                self.handles.append(
-                    layer.register_forward_pre_hook(lambda mod, _args: mod.to(device))
-                )
+                self.handles.append(layer.register_forward_pre_hook(_to_device(device)))
             self.handles.append(
                 layer.register_forward_hook(self._layer_hook(i, offload))
             )

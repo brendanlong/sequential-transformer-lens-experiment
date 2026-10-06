@@ -14,6 +14,8 @@ import json
 from collections.abc import Callable
 from pathlib import Path
 
+from looped_lm import lens_grid_html as lg
+
 DOMAIN = "looped-lens-a783c534.surge.sh"
 REPO = "https://github.com/brendanlong/sequential-transformer-lens-experiment"
 
@@ -434,6 +436,60 @@ def build(results: Path) -> tuple[str, str]:
         all_rows,
     )
 
+    # ---- lens examples
+    examples = json.loads((results / "twohop-lens-examples.json").read_text())
+    ckpt = {
+        n: f"checkpoints/systematicity/{n.rsplit('_', 1)[0]}/checkpoint_epoch_{n.rsplit('_', 1)[1]}.pt"
+        for n, _ in CAUSAL_MODELS
+    }
+    reads = {ckpt[n]: set(read_window(n)) for n, _ in CAUSAL_MODELS}
+    p0 = examples["prompts"][0]
+    trio = [
+        ("r1_l8_2001", "standard 8 layers"),
+        ("r2_l4_1201", "looped 4×2, ID stage"),
+        ("r2_l4_7101", "looped 4×2, OOD stage"),
+    ]
+    static_grids = "".join(
+        lg.twohop_grid(
+            examples["models"][ckpt[n]], 0, p0, [1, 2], label, reads[ckpt[n]]
+        )
+        for n, label in trio
+    )
+    twohop_examples = (
+        lg.STYLE + lg.legend() + f'<div class="lgwrap">{static_grids}</div>'
+    )
+    explorer = lg.twohop_explorer(
+        examples, [(ckpt[n], label) for n, label in CAUSAL_MODELS], reads
+    )
+    lm_dir = results / "ifm-lens-examples"
+    lm_models = [
+        (n, label, json.loads((lm_dir / f"{n}.json").read_text()))
+        for n, label in IFM
+        if (lm_dir / f"{n}.json").exists()
+    ]
+    lm_section = ""
+    if lm_models:
+        by = {n: d for n, _, d in lm_models}
+        statics = "".join(
+            f"<p><strong>{esc(label)}</strong></p>" + lg.lm_table(by[n]["prompts"][0])
+            for n, label in IFM
+            if n in by and n in ("dense-d112-336b", "dense-ouro-336b")
+        )
+        lm_section = f"""<h3>What the lens looks like on text</h3>
+<p>Each column is a position in the prompt and each row a depth; the cell is the logit
+lens's top token for the <em>next</em> position, shaded by its probability (darker =
+more confident). Hover a cell for the top five. Below: the standard 112-layer model and
+the Ouro-style looped model (28 layers × 4) on the same sentence.</p>
+{statics}
+<p>In the standard model the continuation (“Tower”, “located”, “France”, “Paris”)
+shows up from about 70% of depth. In the looped model the middle loops show the same
+few generic tokens (“a”, “in”, “The”) at every position, often confidently, and the
+real prediction appears only in roughly the last 15% of depth. The bottom rows are noise
+in both: the lens on the raw embeddings, and a band of “import” at 7% of depth in the
+standard model.</p>
+<p>Any model and prompt (two of the prompts are random FineWeb-Edu snippets):</p>
+{lg.lm_explorer(lm_models)}"""
+
     # ---- IFM
     def ifm_lines(fn: Callable[[dict], float]) -> list:
         out = []
@@ -611,6 +667,21 @@ of facts never composed in training (“OOD”, which only looped models reach).
 below is measured on 1,000–2,000 held-out pairs of seen facts, which every model answers
 at {pct(min(S[n]["acc"] for n, _ in CAUSAL_MODELS))}–{pct(max(S[n]["acc"] for n, _ in CAUSAL_MODELS))}.</p>
 
+<h3>What the lens looks like</h3>
+<p>One held-out prompt, <code>{esc(" ".join(p0["tokens"]))}</code>: the bridge is
+<code>{esc(p0["bridge"])}</code> and the answer <code>{esc(p0["answer"])}</code>. Each cell
+is the logit lens at one layer (row) and position (column): the label is its top token and
+probability, and the bar shows its top three tokens and the rest of the probability. The
+green edge marks the layers where the causal test below says the model reads the bridge.
+Three models of the same depth:</p>
+{twohop_examples}
+<p>Typical of every prompt: the lens puts almost all of its non-uniform mass on a single
+token, so a cell is basically “one token at some confidence”. In the standard model the
+bridge appears at the first relation only after the green layers; in the looped OOD-stage
+model it is the lens's confident top token for most of them.</p>
+<p>Any model and prompt:</p>
+{explorer}
+
 <p>Because attention is causal, the second hop has to get the bridge from the first
 relation's position, so that is where we look. To find <em>when</em> it takes it, I replace
 that position's whole residual at one layer with the residual from a different question
@@ -671,6 +742,8 @@ model stores 28 blocks and executes 112. The controls are a standard 112-block m
 intermediate in text, so the measure is how early the lens agrees with the model's own
 final prediction. A tuned lens (a least-squares map to the final layer) is the reference
 for what is linearly there.</p>
+
+{lm_section}
 
 {fig_ifm}
 <details open><summary>Summary (each cell averages ±2.7% of depth)</summary>{ifm_table}</details>
