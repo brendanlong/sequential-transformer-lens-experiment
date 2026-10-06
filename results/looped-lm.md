@@ -64,6 +64,21 @@ shows is what the model reads; a probe checks what the lens misses.
   tuned lens +20 → +20), with both models about a point better at prediction.
   The 336B Huginn run, repeated on a different GPU, reproduces within 0.5
   points (`results/looped-lm/ifm-check/`).
+- **Is *any* token visible in the language models?** Barely, in any of them.
+  The best single output-token direction explains at most ~4 points of the
+  token-varying residual beyond noise; looped models are slightly more
+  token-like in the first half of depth and less in the last part. An
+  *embedding lens* (similarity to input embeddings, which these models don't
+  tie to the output ones) finds nothing after the first block, except the
+  current token in the model that re-injects its input.
+- **Natural two-hop questions** (TwoHopFact, `looped_lm/ifm_twohop.py`, 4,000
+  prompts, scored on those where the model knows the bridge): comparing the
+  same bridge token in its own prompt vs another prompt of the same category
+  (which cancels token frequency), the logit lens prefers the true bridge at
+  the end of the description on 55–76% of prompts in every model (50% =
+  chance). Looped models show it earlier (at 25% depth 58–72% vs 55–57% for
+  the standard models), standard models more by the end (at 90% 63–67% vs
+  73–74%). The bridge is rarely near the top of the ranking.
 - Caveats: one run per configuration, stage- (not step-) matched two-hop
   checkpoints, one task — and the most favourable one for the lens, since the
   intermediate is also a trained output token.

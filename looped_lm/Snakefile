@@ -27,6 +27,25 @@ rule ifm_all:
     input:
         expand("results/looped-lm/ifm/{model}.json", model=IFM_MODELS),
         expand("results/looped-lm/ifm-lens-examples/{model}.json", model=IFM_MODELS),
+        expand("results/looped-lm/ifm-twohop/{model}.json", model=IFM_MODELS),
+
+
+rule ifm_twohop:
+    input:
+        f"{IFM_ROOT}/{{model}}/artifact_manifest.json",
+        "looped_lm/ifm.py",
+        "looped_lm/ifm_twohop.py",
+    output:
+        "results/looped-lm/ifm-twohop/{model}.json",
+    log:
+        "results/looped-lm/ifm-twohop/{model}.log",
+    params:
+        dir=lambda wc: f"{IFM_ROOT}/{wc.model}",
+    resources:
+        gpu=1,
+    shell:
+        "{IFM_PYTHON} -m looped_lm.ifm_twohop --artifact {params.dir}"
+        " --out {output[0]} > {log} 2>&1"
 
 
 rule ifm_lens_examples:

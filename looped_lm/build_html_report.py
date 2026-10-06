@@ -11,6 +11,7 @@ Published at https://looped-lens-a783c534.surge.sh (Lion Reader article
 import argparse
 import html
 import json
+import random
 from collections.abc import Callable
 from pathlib import Path
 
@@ -74,6 +75,8 @@ def line_chart(
     x_label: str,
     y_range: tuple[float, float],
     y_fmt: Callable[[float], str] = pct,
+    y_log: bool = False,
+    x_range: tuple[float, float] | None = None,
     caption: str,
 ) -> str:
     """Small-multiple line chart as inline SVG.
@@ -86,7 +89,12 @@ def line_chart(
     pw = (width - (cols - 1) * 18) / cols
     legend_h = 22 * (-(-len(legend) // 2)) + 10
     height = rows * (panel_h + pad_t + pad_b) + legend_h
-    y0, y1 = y_range
+    import math
+
+    def tf(v: float) -> float:
+        return math.log10(max(v, 1e-12)) if y_log else v
+
+    y0, y1 = tf(y_range[0]), tf(y_range[1])
     out = [
         f'<figure><svg viewBox="0 0 {width} {height:.0f}" role="img" '
         f'aria-label="{esc(caption)}" font-family="system-ui, sans-serif" font-size="11">'
@@ -96,7 +104,7 @@ def line_chart(
         oy = (i // cols) * (panel_h + pad_t + pad_b)
         iw, ih = pw - pad_l - pad_r, panel_h
         xs = [x for line in p["lines"] for x, _ in line[1]]
-        x0, x1 = min(xs), max(xs)
+        x0, x1 = x_range if x_range else (min(xs), max(xs))
 
         def sx(
             x: float, ox: float = ox, x0: float = x0, x1: float = x1, iw: float = iw
@@ -104,15 +112,19 @@ def line_chart(
             return ox + pad_l + (x - x0) / ((x1 - x0) or 1) * iw
 
         def sy(y: float, oy: float = oy, ih: float = ih) -> float:
-            y = min(max(y, y0), y1)
+            y = min(max(tf(y), y0), y1)
             return oy + pad_t + ih - (y - y0) / (y1 - y0) * ih
 
         out.append(
             f'<text x="{ox + pad_l}" y="{oy + 14}" font-weight="600" fill="#0b0b0b" '
             f'class="ink">{esc(p["title"])}</text>'
         )
-        for k in range(5):
-            yv = y0 + (y1 - y0) * k / 4
+        ticks = (
+            [10.0**k for k in range(math.ceil(y0), math.floor(y1) + 1)]
+            if y_log
+            else [y0 + (y1 - y0) * k / 4 for k in range(5)]
+        )
+        for yv in ticks:
             out.append(
                 f'<line x1="{ox + pad_l}" x2="{ox + pad_l + iw}" y1="{sy(yv):.1f}" '
                 f'y2="{sy(yv):.1f}" stroke="#e1e0d9" class="grid"/>'
@@ -615,6 +627,299 @@ This is a weak test: 500B tokens is the end of the learning-rate schedule, nowhe
 the toy models' thousands of epochs.</p>
 {table(["Model", "final next-token top-1", "logit lens agrees at 75 / 90% depth", "tuned lens agrees at 75 / 90%"], t_rows)}"""
 
+    # ---- is any token visible? (intrinsic, both dictionaries)
+    has_embed = all("omp_r2_embed" in ifm[n][0] for n, _ in IFM)
+    vis_panels = [
+        {
+            "title": "One token explains: output embeddings",
+            "lines": ifm_lines(lambda r: r["omp_r2"][0] - r["omp_r2_null"][0]),
+        }
+    ]
+    if has_embed:
+        vis_panels += [
+            {
+                "title": "One token explains: input embeddings",
+                "lines": ifm_lines(
+                    lambda r: r["omp_r2_embed"][0] - r["omp_r2_null_embed"][0]
+                ),
+            },
+        ]
+    fig_visible = line_chart(
+        vis_panels,
+        ifm_legend,
+        cols=2,
+        panel_h=170,
+        x_label="fraction of executed depth",
+        y_range=(0, 0.1),
+        caption=(
+            "Variance of the token-varying part of the residual explained by the single "
+            "best-matching token direction, minus the same for Gaussian noise of matched "
+            "covariance, on 512 FineWeb-Edu positions. Left: output (unembedding) "
+            "directions, which the logit lens reads. Right: input-embedding directions, "
+            "which these models do not tie to the output ones."
+        ),
+    )
+    fig_current = ""
+    if has_embed:
+        fig_current = line_chart(
+            [
+                {
+                    "title": "Embedding lens: top match is the current token",
+                    "lines": ifm_lines(lambda r: r["embed_lens_top1"]["current_token"]),
+                },
+                {
+                    "title": "Embedding lens: top match is the final prediction",
+                    "lines": ifm_lines(lambda r: r["embed_lens_top1"]["final_top1"]),
+                },
+            ],
+            ifm_legend,
+            cols=2,
+            panel_h=170,
+            x_label="fraction of executed depth",
+            y_range=(0, 1),
+            caption=(
+                "The embedding lens: which token's input embedding the residual is most "
+                "similar to (cosine, embeddings centered over the vocabulary), on 4,096 "
+                "FineWeb-Edu positions."
+            ),
+        )
+
+    def vis_at(n: str, f: float, key: str) -> float:
+        return window(
+            ifm[n], f, lambda r: r[key][0] - r[key.replace("omp_r2", "omp_r2_null")][0]
+        )
+
+    # ---- two-hop questions in the language models
+    th_dir = results / "ifm-twohop"
+    th_lm = {
+        n: json.loads((th_dir / f"{n}.json").read_text())
+        for n, _ in IFM
+        if (th_dir / f"{n}.json").exists()
+    }
+    lm_twohop = ""
+    if len(th_lm) == len(IFM):
+
+        def known(d: dict) -> list[int]:
+            if "one_hop_rank" in d:
+                return [i for i, r in enumerate(d["one_hop_rank"]) if r <= 10]
+            return [i for i, ok in enumerate(d["one_hop_correct"]) if ok]
+
+        def median(v: list[int]) -> float:
+            v = sorted(v)
+            return float(v[len(v) // 2]) if v else float("nan")
+
+        def rank_lines(key: str) -> list:
+            out = []
+            for i, (n, label) in enumerate(IFM):
+                d = th_lm[n]
+                idx = known(d)
+                depth = len(d["layers"]) - 1
+                out.append(
+                    (
+                        i,
+                        [
+                            (r["execution"] / depth, median([r[key][j] for j in idx]))
+                            for r in d["layers"]
+                        ],
+                        False,
+                        label,
+                    )
+                )
+            return out
+
+        def pairs(d: dict) -> list[tuple[int, int]]:
+            """(i, j): j's control token is i's bridge (same category); i is known.
+
+            Comparing the same token in its own prompt and in another prompt of the
+            same category cancels token frequency and type exactly.
+            """
+            known_set = set(known(d))
+            by_tok: dict[tuple[str, int], list[int]] = {}
+            for i, it in enumerate(d["items"]):
+                by_tok.setdefault((it["bridge_category"], it["bridge_tok"]), []).append(
+                    i
+                )
+            rng = random.Random(0)
+            out = []
+            for j, it in enumerate(d["items"]):
+                cands = [
+                    i
+                    for i in by_tok.get((it["bridge_category"], it["control_tok"]), [])
+                    if i in known_set and i != j
+                ]
+                if cands:
+                    out.append((rng.choice(cands), j))
+            return out
+
+        th_pairs = {n: pairs(th_lm[n]) for n, _ in IFM}
+
+        def own_beats_other(n: str, r: dict, pos: str, lens: str) -> float:
+            b, c = r[f"{pos}_{lens}_bridge_rank"], r[f"{pos}_{lens}_control_rank"]
+            return sum(b[i] < c[j] for i, j in th_pairs[n]) / len(th_pairs[n])
+
+        def beats_lines(pos: str, lens: str) -> list:
+            out = []
+            for i, (n, label) in enumerate(IFM):
+                layers = th_lm[n]["layers"]
+                depth = len(layers) - 1
+                out.append(
+                    (
+                        i,
+                        [
+                            (r["execution"] / depth, own_beats_other(n, r, pos, lens))
+                            for r in layers[1:]
+                        ],
+                        False,
+                        label,
+                    )
+                )
+            return out
+
+        fig_lm_twohop = line_chart(
+            [
+                {
+                    "title": "End of the description, logit lens",
+                    "lines": beats_lines("desc", "logit"),
+                },
+                {
+                    "title": "End of the description, embedding lens",
+                    "lines": beats_lines("desc", "embed"),
+                },
+                {
+                    "title": "Last token, logit lens",
+                    "lines": beats_lines("last", "logit"),
+                },
+                {
+                    "title": "Last token, embedding lens",
+                    "lines": beats_lines("last", "embed"),
+                },
+            ],
+            ifm_legend,
+            cols=2,
+            panel_h=170,
+            x_label="fraction of executed depth",
+            y_range=(0, 1),
+            x_range=(0, 1),
+            caption=(
+                "How often the lens ranks a bridge's first token higher in its own "
+                "prompt than in another prompt of the same category (another author, "
+                "another country…), over prompts where the model knows the bridge. The "
+                "same token on both sides cancels its frequency; 50% means the lens says "
+                "nothing about which entity this prompt is about. From the first block "
+                "on (the raw embeddings compare different input tokens)."
+            ),
+        )
+        fig_lm_rank = line_chart(
+            [
+                {
+                    "title": "Bridge at the end of the description, logit lens",
+                    "lines": rank_lines("desc_logit_bridge_rank"),
+                },
+                {
+                    "title": "Answer at the last token, logit lens",
+                    "lines": rank_lines("last_logit_answer_rank"),
+                },
+            ],
+            ifm_legend,
+            cols=2,
+            panel_h=170,
+            x_label="fraction of executed depth",
+            y_range=(1, 250000),
+            y_log=True,
+            y_fmt=lambda v: f"{v:,.0f}",
+            caption=(
+                "Median rank (log scale; 1 = the lens's top token) among the 250k "
+                "vocabulary, same prompts. A random token's median rank is about 125,000."
+            ),
+        )
+        rows_th = []
+        for n, label in IFM:
+            d = th_lm[n]
+            idx = known(d)
+            two = d.get("two_hop_rank")
+            acc = (
+                sum(two[i] == 1 for i in idx) / len(idx)
+                if two
+                else sum(d["two_hop_correct"][i] for i in idx) / len(idx)
+            )
+
+            def best(pos: str, lens: str, n: str = n, d: dict = d) -> str:
+                share = [own_beats_other(n, r, pos, lens) for r in d["layers"][1:-1]]
+                k = max(range(len(share)), key=share.__getitem__)
+                return f"{pct(share[k])} at {(k + 1) / (len(d['layers']) - 1):.0%}"
+
+            rows_th.append(
+                [
+                    esc(label),
+                    f"{len(idx)} of {len(d['items'])}",
+                    pct(acc),
+                    best("desc", "logit"),
+                    best("desc", "embed"),
+                    best("last", "logit"),
+                ]
+            )
+        th_table = table(
+            [
+                "Model",
+                "prompts where it knows the bridge",
+                "two-hop answer top-1 (of those)",
+                "own prompt beats other prompt, description end, logit lens (best layer before the last)",
+                "same, embedding lens",
+                "same, last token, logit lens",
+            ],
+            rows_th,
+        )
+        lm_twohop = f"""<h3>Two-hop questions: is the bridge visible?</h3>
+<p>Prompts from <a href="https://huggingface.co/datasets/soheeyang/TwoHopFact">TwoHopFact</a>
+(Yang et al. 2024), e.g. “The author of the novel Nineteen Eighty-Four was born in the
+city of” (bridge: George Orwell; answer: Motihari). 4,000 random prompts; each model
+is scored on the ones where it knows the bridge. At two positions, the end of the
+description (“…Eighty-Four”, where Yang et al. find the bridge is recalled) and the last
+token, I compare how highly each lens ranks the bridge's first token in its own prompt
+against the same token in another prompt of the same category. A raw rank would mostly
+measure how common the token is; this comparison cancels that.</p>
+{fig_lm_twohop}
+<p>The logit lens carries a faint, steady signal about the bridge in every model, and the
+embedding lens essentially none (except the model that re-injects its input). The looped
+models, Huginn most of all, show it somewhat earlier; the standard models catch up by
+about 60% of depth and lead at the end. The bridge is rarely anywhere near the top of the
+lens's ranking: this is a weak statistical preference, not a readable intermediate.</p>
+<details><summary>Median ranks of the bridge and the answer</summary>{fig_lm_rank}</details>
+{th_table}"""
+
+    visible_text = ""
+    if has_embed:
+        std_names = ("dense-d112-336b", "dense-d28-336b")
+        loop_names = [n for n, _ in IFM if n not in std_names]
+
+        def vis(n: str, f: float, emb: bool = False) -> float:
+            k = "_embed" if emb else ""
+            return window(
+                ifm[n], f, lambda r: r[f"omp_r2{k}"][0] - r[f"omp_r2_null{k}"][0]
+            )
+
+        def span_pts(vals: list[float]) -> str:
+            return f"{min(vals) * 100:.1f}–{max(vals) * 100:.1f}"
+
+        inj = "dense-ouro-raw-injection-336b"
+        others = [n for n, _ in IFM if n != inj]
+        cur = [
+            window(ifm[inj], f, lambda r: r["embed_lens_top1"]["current_token"])
+            for f in (0.25, 0.5, 0.75)
+        ]
+        visible_text = f"""<p>Through the output directions the logit lens reads, the
+token-varying part of the residual is never close to a single token: the best one explains
+at most a few points of variance beyond noise. Looped models are slightly more token-like
+in the first half of depth (at 50%: {span_pts([vis(n, 0.5) for n in loop_names])} points vs
+{span_pts([vis(n, 0.5) for n in std_names])}) and less in the last part (at 90%:
+{span_pts([vis(n, 0.9) for n in loop_names])} vs {span_pts([vis(n, 0.9) for n in std_names])}).
+Through the input embeddings there is nothing at all after the first block
+({span_pts([vis(n, f, True) for n in others for f in (0.25, 0.5, 0.75, 0.9)])} points),
+except in the Ouro-style model that re-injects its input every loop
+({span_pts([vis(inj, f, True) for f in (0.25, 0.5, 0.75, 0.9)])} points), where the
+best-matching input token is simply the current token ({pct(min(cur))}–{pct(max(cur))} of
+positions). So neither lens finds hidden token-shaped states in the looped language
+models.</p>"""
     std = ("dense-d112-336b", "dense-d28-336b")
     loops = [n for n, _ in IFM if n not in std]
     at90_std = [window(ifm[n], 0.9, agree("lens")) for n in std]
@@ -634,7 +939,6 @@ the toy models' thousands of epochs.</p>
         for r in ifm[n]
         if 0.25 <= r["execution"] / (len(ifm[n]) - 1) <= 0.75
     ]
-    omp_peak = max(r["omp_r2"][0] - r["omp_r2_null"][0] for n, _ in IFM for r in ifm[n])
 
     v8, v4 = S["r1_l8_2001"], S["r1_l4_13501"]
     l2, l4 = S["r2_l4_1201"], S["r4_l4_401"]
@@ -656,6 +960,30 @@ the toy models' thousands of epochs.</p>
         )
     )
 
+    lm_bullet = (
+        f"Late in the network the looped models are <em>less</em> readable (the lens agrees "
+        f"with the final prediction {pct(min(at90_loop))}–{pct(max(at90_loop))} vs "
+        f"{pct(min(at90_std))}–{pct(max(at90_std))} at 90% depth)."
+    )
+    if lm_twohop:
+        std_n = ("dense-d112-336b", "dense-d28-336b")
+
+        def ob(n: str, f: float) -> float:
+            layers = th_lm[n]["layers"]
+            return own_beats_other(
+                n, layers[max(1, round(f * (len(layers) - 1)))], "desc", "logit"
+            )
+
+        lp = [n for n, _ in IFM if n not in std_n]
+        lm_bullet += (
+            " On natural two-hop questions the bridge entity is faintly visible in every "
+            "model; looped models show it a little earlier (at 25% depth "
+            f"{pct(min(ob(n, 0.25) for n in lp))}–{pct(max(ob(n, 0.25) for n in lp))} vs "
+            f"{pct(min(ob(n, 0.25) for n in std_n))}–{pct(max(ob(n, 0.25) for n in std_n))} "
+            "of prompts, where 50% is chance) and standard models more by the end (at 90%: "
+            f"{pct(min(ob(n, 0.9) for n in lp))}–{pct(max(ob(n, 0.9) for n in lp))} vs "
+            f"{pct(min(ob(n, 0.9) for n in std_n))}–{pct(max(ob(n, 0.9) for n in std_n))})."
+        )
     body = f"""{style}
 <p>The question: <strong>does weight sharing (looping) make the logit lens show the
 intermediate state a model actually uses?</strong> The logit lens is the tool we care about,
@@ -687,11 +1015,9 @@ shows then is not used.</li>
 <li><strong>Looping isn't sufficient on its own.</strong> The 2-iteration model at its
 earlier training stage behaves like the standard ones (swap redirects
 {pct(l2["swap"])}).</li>
-<li><strong>It doesn't carry over to language models.</strong> In six 1.5–3.7B models
-trained on the same 336B tokens, looped models are, if anything, <em>less</em> readable
-late in the network (lens agrees with the final prediction {pct(min(at90_loop))}–{pct(max(at90_loop))}
-vs {pct(min(at90_std))}–{pct(max(at90_std))} at 90% depth). There is no known intermediate
-there, so no causal test.</li>
+<li><strong>It mostly doesn't carry over to language models.</strong> In six 1.5–3.7B
+models trained on the same 336B tokens, nothing is strongly token-shaped in any of them.
+{lm_bullet}</li>
 <li><strong>Caveats:</strong> one training run per configuration, two-hop checkpoints matched
 by training stage rather than step, and a single task.</li>
 </ul>
@@ -782,15 +1108,29 @@ facts.</p></details>
 Looped Models Done Right</a> trained six models on the same 336B tokens with the same
 tokenizer, width, seed and schedule, with loss only on the final output. Every looped
 model stores 28 blocks and executes 112. The controls are a standard 112-block model
-(same executed depth) and a standard 28-block model (same parameters). There is no known
-intermediate in text, so the measure is how early the lens agrees with the model's own
-final prediction. A tuned lens (a least-squares map to the final layer) is the reference
-for what is linearly there.</p>
+(same executed depth) and a standard 28-block model (same parameters). Unlike the toy
+models, these do not tie input and output embeddings, so besides the logit lens I also
+use an <em>embedding lens</em>: which token's <em>input</em> embedding the residual most
+resembles.</p>
 
 {lm_section}
 
+<h3>Is any token visible?</h3>
+<p>The question here isn't whether the lens shows the final answer, but whether the
+residual is close to <em>any</em> token at all, which is what would make the lens useful
+for finding intermediates we don't know to look for.</p>
+{fig_visible}
+{visible_text}
+{fig_current}
+
+{lm_twohop}
+
+<h3>Agreement with the final prediction</h3>
+<p>A secondary measure: how early the logit lens's top token matches the model's own
+final prediction, with a tuned lens (a least-squares map to the final layer) as the
+reference for what is linearly there.</p>
 {fig_ifm}
-<details open><summary>Summary (each cell averages ±2.7% of depth)</summary>{ifm_table}</details>
+<details><summary>Summary (each cell averages ±2.7% of depth)</summary>{ifm_table}</details>
 
 <p>From 75% of depth on, both standard models lead every looped model, and the models
 that loop 8 times are generally the least readable. Loop boundaries don't help: in the
@@ -800,14 +1140,13 @@ better there than one block later ({bump(ouro)}). With input injection it is
 
 {training_section}
 
-<details><summary>Dark subspace and token reconstruction in the language models</summary>
+<details><summary>Dark subspace in the language models</summary>
 {fig_dark}
 <p>{pct(min(dark_mid))}–{pct(max(dark_mid))} of the residual's raw energy through the
 middle half of depth sits in the quarter of directions the output matrix reads most
-weakly: a large component shared by every token, invisible to the lens. The part that
-varies between tokens is spread roughly evenly, and the residual is never close to a few
-token directions (the best single token explains at most {omp_peak:.1%} more variance
-than noise).</p></details>
+weakly: a large component shared by every token, invisible to the lens. Input injection
+shows up as a sawtooth: each injection adds it back and the following blocks drain it.</p>
+</details>
 
 <h2>Caveats</h2>
 <ul>

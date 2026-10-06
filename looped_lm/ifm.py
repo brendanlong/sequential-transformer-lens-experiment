@@ -33,6 +33,7 @@ dense-d112 (7.4 GB of bf16 weights) runs on an 8 GB card.
 """
 
 import argparse
+import gc
 import json
 import random
 from collections.abc import Callable
@@ -220,9 +221,17 @@ def analyse(args: argparse.Namespace) -> dict:
     head = model.output
     eps = getattr(head.final_norm, "eps", cfg.rmsnorm_eps)
     gain = effective_gain(head.final_norm, cfg.model_dim, eps).to(device)
-    unembed = head.output.weight.detach().float().to(device)
+    unembed_cpu = head.output.weight.detach().to("cpu", torch.float32)
+    embed_cpu = model.embed.weight.detach().to("cpu", torch.float32)
     del model, head
+    gc.collect()  # the recording hooks leave reference cycles
     torch.cuda.empty_cache()
+    unembed = unembed_cpu.to(device)
+    # Input embeddings (not tied to the unembedding in these models), centered
+    # over the vocabulary like the readout, as a second dictionary.
+    embed = embed_cpu.to(device)
+    embed_atoms = F.normalize(embed - embed.mean(0), dim=-1)
+    del embed, embed_cpu, unembed_cpu
 
     def logits_from_z(z: Tensor) -> Tensor:
         return (z * gain) @ unembed.T
@@ -269,7 +278,16 @@ def analyse(args: argparse.Namespace) -> dict:
         zc = z_eval - z_eval.mean(0)
         sub = zc[omp_rows]
         r2, chosen = lm.omp_r2(sub, atoms, args.k_max)
-        r2_null, _ = lm.omp_r2(lm.gaussian_null(sub, generator), atoms, args.k_max)
+        null = lm.gaussian_null(sub, generator)
+        r2_e, chosen_e = lm.omp_r2(sub, embed_atoms, args.k_max)
+        r2_e_null, _ = lm.omp_r2(null, embed_atoms, args.k_max)
+        embed_top1 = torch.cat(
+            [
+                (z_eval[c : c + args.chunk] @ embed_atoms.T).argmax(-1)
+                for c in range(0, len(z_eval), args.chunk)
+            ]
+        )
+        r2_null, _ = lm.omp_r2(null, atoms, args.k_max)
         first = chosen[:, 0]
         outliers = torch.cat(
             [
@@ -296,6 +314,27 @@ def analyse(args: argparse.Namespace) -> dict:
                     .item(),
                     "next_token": (first == next_eval[omp_rows]).float().mean().item(),
                     "final_top1": (first == final_top1[omp_rows]).float().mean().item(),
+                },
+                "omp_r2_embed": r2_e.tolist(),
+                "omp_r2_null_embed": r2_e_null.tolist(),
+                "omp_first_atom_embed": {
+                    "current_token": (chosen_e[:, 0] == cur_eval[omp_rows])
+                    .float()
+                    .mean()
+                    .item(),
+                    "next_token": (chosen_e[:, 0] == next_eval[omp_rows])
+                    .float()
+                    .mean()
+                    .item(),
+                    "final_top1": (chosen_e[:, 0] == final_top1[omp_rows])
+                    .float()
+                    .mean()
+                    .item(),
+                },
+                "embed_lens_top1": {
+                    "current_token": (embed_top1 == cur_eval).float().mean().item(),
+                    "next_token": (embed_top1 == next_eval).float().mean().item(),
+                    "final_top1": (embed_top1 == final_top1).float().mean().item(),
                 },
                 "outliers_mean": outliers.float().mean().item(),
                 "outliers_median": outliers.float().median().item(),

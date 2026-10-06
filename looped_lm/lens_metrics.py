@@ -41,7 +41,7 @@ def folded_readout(unembed: Tensor, gain: Tensor | None, centers: bool) -> Tenso
     return w
 
 
-def singular_basis(readout: Tensor, chunk: int = 65536) -> tuple[Tensor, Tensor]:
+def singular_basis(readout: Tensor, chunk: int = 16384) -> tuple[Tensor, Tensor]:
     """Singular values (descending) and the matching right singular vectors as rows.
 
     Computed from the (dim, dim) Gram matrix in float64, so a 250k-row readout
