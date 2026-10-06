@@ -58,7 +58,12 @@ shows is what the model reads; a probe checks what the lens misses.
   behaves like the standard ones (1%).
 - **Language models (IFM): no advantage.** From 75% of depth on, both standard
   models are more lens-readable than every loop design. There is no known
-  intermediate there, so no causal test.
+  intermediate there, so no causal test. More training doesn't change this: at
+  the end-of-schedule 500B-token checkpoints (D112 and Huginn only) the
+  standard model's lead at 90% depth is the same (logit lens +20 → +21 points,
+  tuned lens +20 → +20), with both models about a point better at prediction.
+  The 336B Huginn run, repeated on a different GPU, reproduces within 0.5
+  points (`results/looped-lm/ifm-check/`).
 - Caveats: one run per configuration, stage- (not step-) matched two-hop
   checkpoints, one task — and the most favourable one for the lens, since the
   intermediate is also a trained output token.

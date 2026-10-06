@@ -35,6 +35,7 @@ dense-d112 (7.4 GB of bf16 weights) runs on an 8 GB card.
 import argparse
 import json
 import random
+from collections.abc import Callable
 from pathlib import Path
 
 import torch
@@ -156,9 +157,23 @@ def ridge(x: Tensor, y: Tensor, rel_lambda: float = 1e-3) -> tuple[Tensor, Tenso
     return a.float(), (y_mean - x_mean @ a).float()
 
 
+class _ChunkedLogp:
+    """``final_logp[a:b]`` computed on demand from a logits function of a slice."""
+
+    def __init__(self, logits: Callable[[slice], Tensor]) -> None:
+        self.logits = logits
+
+    def __getitem__(self, sl: slice) -> Tensor:
+        return F.log_softmax(self.logits(sl), dim=-1)
+
+
 @torch.no_grad()
 def lens_stats(
-    logits_fn: object, z: Tensor, final_logp: Tensor, next_tok: Tensor, chunk: int
+    logits_fn: object,
+    z: Tensor,
+    final_logp: "Tensor | _ChunkedLogp",
+    next_tok: Tensor,
+    chunk: int,
 ) -> dict[str, float]:
     kl = agree = next_acc = 0.0
     for s in range(0, len(z), chunk):
@@ -224,13 +239,15 @@ def analyse(args: argparse.Namespace) -> dict:
     cur_eval = cur_tok.flatten()[split:].to(device)
     z_final_train = rms_normed(flat[-1, :split].to(device), eps)
     z_final_eval = rms_normed(flat[-1, split:].to(device), eps)
-    final_logp = torch.cat(
+    # Recomputed per chunk rather than stored: (tokens, 250k) log-probs would not
+    # fit on an 8 GB card. Same chunks as lens_stats, so the values are identical.
+    final_logp = _ChunkedLogp(lambda sl: logits_from_z(z_final_eval[sl]))
+    final_top1 = torch.cat(
         [
-            F.log_softmax(logits_from_z(z_final_eval[c : c + args.chunk]), dim=-1)
+            final_logp[c : c + args.chunk].argmax(-1)
             for c in range(0, len(z_final_eval), args.chunk)
         ]
     )
-    final_top1 = final_logp.argmax(-1)
     generator = torch.Generator().manual_seed(args.seed)
     # Spread over every evaluation document rather than the first few.
     omp_rows = torch.randperm(len(z_final_eval), generator=generator)[: args.n_omp]

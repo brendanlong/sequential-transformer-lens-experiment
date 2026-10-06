@@ -571,6 +571,50 @@ standard model.</p>
         ],
         ifm_rows,
     )
+    late = [
+        (n, label)
+        for n, label in (
+            ("dense-d112-336b", "D112, 336B tokens"),
+            ("dense-d112-500b", "D112, 500B tokens (end of schedule)"),
+            ("dense-huginn-336b", "Huginn, 336B tokens"),
+            ("dense-huginn-500b", "Huginn, 500B tokens (end of schedule)"),
+        )
+        if (results / "ifm" / f"{n}.json").exists()
+    ]
+    training_section = ""
+    if len(late) == 4:
+        lr = {
+            n: json.loads((results / "ifm" / f"{n}.json").read_text())["rows"]
+            for n, _ in late
+        }
+        t_rows = [
+            [
+                esc(label),
+                f"{lr[n][-1]['lens']['next_token_top1']:.1%}",
+                " / ".join(pct(window(lr[n], f, agree("lens"))) for f in (0.75, 0.9)),
+                " / ".join(
+                    pct(window(lr[n], f, agree("tuned_ridge"))) for f in (0.75, 0.9)
+                ),
+            ]
+            for n, label in late
+        ]
+
+        def gap(key: str, tokens: str, f: float) -> float:
+            return window(lr[f"dense-d112-{tokens}"], f, agree(key)) - window(
+                lr[f"dense-huginn-{tokens}"], f, agree(key)
+            )
+
+        training_section = f"""<h3>Does more training close the gap?</h3>
+<p>The toy looped models became lens-aligned only late in training, so maybe the
+language models are just not trained far enough. IFM released end-of-schedule (500B
+token) checkpoints for two of the models. From 336B to 500B tokens both predict about a
+point better, but the standard model's lead at 90% depth is unchanged (logit lens
+{gap("lens", "336b", 0.9) * 100:+.0f} → {gap("lens", "500b", 0.9) * 100:+.0f} points,
+tuned lens {gap("tuned_ridge", "336b", 0.9) * 100:+.0f} → {gap("tuned_ridge", "500b", 0.9) * 100:+.0f}).
+This is a weak test: 500B tokens is the end of the learning-rate schedule, nowhere near
+the toy models' thousands of epochs.</p>
+{table(["Model", "final next-token top-1", "logit lens agrees at 75 / 90% depth", "tuned lens agrees at 75 / 90%"], t_rows)}"""
+
     std = ("dense-d112-336b", "dense-d28-336b")
     loops = [n for n, _ in IFM if n not in std]
     at90_std = [window(ifm[n], 0.9, agree("lens")) for n in std]
@@ -753,6 +797,8 @@ that loop 8 times are generally the least readable. Loop boundaries don't help: 
 Ouro-style model the end of each loop feeds the output head directly, yet the lens is no
 better there than one block later ({bump(ouro)}). With input injection it is
 <em>worse</em> just after each injection ({bump(ouro_inj)}).</p>
+
+{training_section}
 
 <details><summary>Dark subspace and token reconstruction in the language models</summary>
 {fig_dark}
