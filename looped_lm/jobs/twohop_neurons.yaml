@@ -1,0 +1,12 @@
+name: looped-lm-twohop-neurons
+setup: uv sync --frozen --group looped
+command: bash looped_lm/jobs/twohop_neurons.sh
+gpus: 1
+env:
+  PYTHONUNBUFFERED: "1"
+  KOHLI_ROOT: /home/claude/worktrees/ec318c16-fd0b-4e61-95e1-825e392be52d/ext/kohli
+outputs:
+  - path: results/looped-lm/twohop-neurons
+priority: 50
+estimated_runtime_min: 40
+cleanup: never

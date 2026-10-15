@@ -534,27 +534,61 @@ standard model.</p>
             "were trained on the same 336B tokens with the same recipe."
         ),
     )
+    sink = {
+        n: json.loads((results / "ifm-sink" / f"{n}.json").read_text())["rows"]
+        for n, _ in IFM
+    }
+
+    def sink_lines(key: str) -> list:
+        out = []
+        for i, (n, label) in enumerate(IFM):
+            rows = sink[n]
+            depth = len(rows) - 1
+            out.append(
+                (i, [(r["execution"] / depth, r[key]) for r in rows[1:]], False, label)
+            )
+        return out
+
     fig_dark = line_chart(
         [
             {
-                "title": "Raw energy in the weakest-read quarter of directions",
-                "lines": ifm_lines(lambda r: r["energy_bands_raw"][-1]),
+                "title": "Weakest-read quarter: raw energy",
+                "lines": sink_lines("dark_raw"),
             },
             {
-                "title": "Variance one token direction explains, above noise",
-                "lines": ifm_lines(lambda r: r["omp_r2"][0] - r["omp_r2_null"][0]),
+                "title": "Same, sink coordinates removed",
+                "lines": sink_lines("dark_no_sink"),
+            },
+            {
+                "title": "Energy in the sink coordinates",
+                "lines": sink_lines("sink_share"),
+            },
+            {
+                "title": "Relative visibility, sinks removed",
+                "lines": sink_lines("visibility_no_sink_centered"),
             },
         ],
         ifm_legend,
         cols=2,
-        panel_h=170,
+        panel_h=150,
         x_label="fraction of executed depth",
-        y_range=(0, 1),
+        y_range=(0, 1.4),
         caption=(
-            "Left: a random vector would put 25% there. Right: on a 0–100% scale "
-            "to compare with the two-hop models; it never exceeds 5%."
+            "On 2,048 FineWeb-Edu positions. A sink coordinate is a single residual "
+            "coordinate holding more than 5% of the normed residual's energy at that "
+            "block; each model has one or two. A random vector would put 25% of its "
+            "energy in the weakest-read quarter and have relative visibility 1."
         ),
     )
+    sink_mid = {
+        key: [
+            r[key]
+            for n, _ in IFM
+            for r in sink[n]
+            if 0.25 <= r["execution"] / (len(sink[n]) - 1) <= 0.75
+        ]
+        for key in ("dark_raw", "dark_no_sink", "sink_share")
+    }
 
     def agree(key: str) -> Callable[[dict], float]:
         return lambda r: r[key]["agree_final_top1"]
@@ -899,7 +933,8 @@ lens's ranking: this is a weak statistical preference, not a readable intermedia
             )
 
         def span_pts(vals: list[float]) -> str:
-            return f"{min(vals) * 100:.1f}–{max(vals) * 100:.1f}"
+            lo, hi = max(min(vals), 0.0), max(max(vals), 0.0)  # noise can dip below 0
+            return f"{lo * 100:.1f}–{hi * 100:.1f}"
 
         inj = "dense-ouro-raw-injection-336b"
         others = [n for n, _ in IFM if n != inj]
@@ -933,12 +968,120 @@ models.</p>"""
             for e in (28, 56, 84)
         )
 
-    dark_mid = [
-        r["energy_bands_raw"][-1]
-        for n, _ in IFM
-        for r in ifm[n]
-        if 0.25 <= r["execution"] / (len(ifm[n]) - 1) <= 0.75
+    # ---- MLP neurons
+    neuron_models = [
+        ("r1_l8_2001", "standard 8 layers"),
+        ("r2_l4_1201", "looped 4×2, ID stage"),
+        ("r4_l4_401", "looped 4×4, ID stage"),
+        ("r2_l4_7101", "looped 4×2, OOD stage"),
     ]
+    nd = {
+        n: json.loads((results / "twohop-neurons" / f"{n}.json").read_text())
+        for n, _ in CAUSAL_MODELS
+    }
+
+    def one_var(e: dict, pos: str) -> float:
+        c = e["positions"][pos]["counts"]
+        active = sum(c.values()) - c["inactive"]
+        return (active - c["mixed"]) / active if active else float("nan")
+
+    neuron_panels = []
+    for n, label in neuron_models:
+        ex = nd[n]["executions"]
+        neuron_panels.append(
+            {
+                "title": label,
+                "lines": [
+                    (
+                        LENS,
+                        [
+                            (e["execution"], one_var(e, "r1"))
+                            for e in ex
+                            if one_var(e, "r1") == one_var(e, "r1")
+                        ],
+                        False,
+                        "first relation (r1)",
+                    ),
+                    (
+                        SWAP,
+                        [
+                            (e["execution"], one_var(e, "r2"))
+                            for e in ex
+                            if one_var(e, "r2") == one_var(e, "r2")
+                        ],
+                        False,
+                        "second relation (r2)",
+                    ),
+                ],
+            }
+        )
+    fig_neurons = line_chart(
+        neuron_panels,
+        [
+            (LENS, "at the first relation (r1)", False),
+            (SWAP, "at the second relation (r2)", False),
+        ],
+        cols=2,
+        panel_h=110,
+        x_label="layer (block execution)",
+        y_range=(0, 1),
+        caption=(
+            "Share of active MLP neurons at each layer whose activation is mostly "
+            "(adjusted eta² ≥ 0.5) explained by a single known variable: the head "
+            "entity, either relation, the bridge or the answer. 60,000 training "
+            "compositions. In a looped model each layer reuses the same neurons, "
+            "measured separately at every iteration."
+        ),
+    )
+
+    def neuron_summary(n: str) -> list[str]:
+        d = nd[n]
+        counts = {"one": 0, "mixed": 0, "inactive": 0}
+        jobs: dict[str, int] = {}
+        for e in d["executions"]:
+            for pos, p in e["positions"].items():
+                for k, v in p["counts"].items():
+                    if k in ("inactive", "mixed"):
+                        counts[k] += v
+                    else:
+                        counts["one"] += v
+                        jobs[f"{k} at {pos}"] = jobs.get(f"{k} at {pos}", 0) + v
+        active = counts["one"] + counts["mixed"]
+        top = sorted(jobs.items(), key=lambda kv: -kv[1])[:2]
+        cons = d["consistency"]
+        same = (
+            pct(
+                sum(c["same_job"] for c in cons) / sum(c["clean_in_both"] for c in cons)
+            )
+            if cons
+            else "—"
+        )
+        return [
+            pct(counts["one"] / active),
+            ", ".join(f"{k} ({pct(v / counts['one'])})" for k, v in top),
+            same,
+        ]
+
+    neuron_table = table(
+        [
+            "Model",
+            "active neuron-layers explained by one variable",
+            "most common jobs",
+            "looped: same job at the next iteration",
+        ],
+        [[esc(label), *neuron_summary(n)] for n, label in CAUSAL_MODELS],
+    )
+    ex_neuron = next(
+        x for x in nd["r4_l4_3501"]["examples"] if x["label"].endswith("bridge")
+    )
+    neuron_example = table(
+        ["input", "bridge", "answer"],
+        [
+            [esc(" ".join(t["tokens"])), esc(t["bridge"]), esc(t["answer"])]
+            for t in ex_neuron["top"]
+        ],
+    )
+    std_mid = [one_var(e, "r1") for e in nd["r1_l8_2001"]["executions"][2:6]]
 
     v8, v4 = S["r1_l8_2001"], S["r1_l4_13501"]
     l2, l4 = S["r2_l4_1201"], S["r4_l4_401"]
@@ -1103,6 +1246,31 @@ much more of the residual in looped models than in standard ones:</li>
 <p>First layer at which the probe / the lens reach 90% top-1 on held-out pairs of seen
 facts.</p></details>
 
+<h3>Are the MLP neurons interpretable?</h3>
+<p>A different way to look inside, following Goodfire's
+<a href="https://already-clean.goodfire.com/">Neural Networks Are Already Clean</a>:
+instead of reading the residual stream, check whether individual MLP neurons have one
+job. Here a neuron has a job if a single known variable (head entity, either relation,
+bridge or answer) explains most of the variation in its activation. The entities are
+random IDs, so a “bridge neuron” is one whose activation is set by which entity the
+bridge is; its top activations share a bridge. For example, the top activations of
+neuron {ex_neuron["neuron"]} at layer {ex_neuron["execution"]} of the looped 4×4 model
+(OOD stage) at the first relation:</p>
+{neuron_example}
+{fig_neurons}
+{neuron_table}
+<p>In every model the first layers at the second relation just detect that relation token, and the final layers are
+clean bridge and answer neurons. The difference is the middle. In the standard 8-layer
+model, at the first relation through layers 3–6, after the bridge has become linearly
+decodable, only {pct(min(std_mid))}–{pct(max(std_mid))} of active neurons are explained by
+any single variable. In the looped models, once the bridge exists nearly every neuron at
+the first relation is a bridge neuron, at every remaining iteration, and a shared neuron
+mostly keeps that job from one iteration to the next. The “mixed” neurons may well be
+doing the fact lookups, which depend on combinations of entity and relation that no
+single variable captures, so mixed doesn't mean polysemantic. But it matches the lens
+results: in the looped models the intermediate is held in a simple, token-like form,
+both in the residual stream and in the neurons.</p>
+
 <h2>Does it carry over to language models?</h2>
 <p>IFM's <a href="https://huskydoge.github.io/husky-blog/posts/recursive_models/towards-looped-models-done-right/">Towards
 Looped Models Done Right</a> trained six models on the same 336B tokens with the same
@@ -1140,13 +1308,20 @@ better there than one block later ({bump(ouro)}). With input injection it is
 
 {training_section}
 
-<details><summary>Dark subspace in the language models</summary>
+<h3>The “dark subspace” is a few massive coordinates</h3>
+<p>Through the middle half of depth, {pct(min(sink_mid["dark_raw"]))}–{pct(max(sink_mid["dark_raw"]))}
+of the residual's raw energy sits in the quarter of directions the output matrix reads most
+weakly. An earlier version of this report called that a dark subspace. It is almost
+entirely one or two single coordinates of the residual stream (“sinks”), holding
+{pct(min(sink_mid["sink_share"]))}–{pct(max(sink_mid["sink_share"]))} of the energy, which
+the unembedding ignores. Goodfire's essay (linked at the end of this paragraph) describes such coordinates as a saliency
+knob that works through the normalization; I haven't tested that here.
+With them removed, the weakest-read quarter holds
+{pct(min(sink_mid["dark_no_sink"]))}–{pct(max(sink_mid["dark_no_sink"]))}, close to the 25%
+of a random vector. The input-injection sawtooth is the injection pushing the sink back up
+each loop. This is the effect described in Goodfire's
+<a href="https://already-clean.goodfire.com/">Neural Networks Are Already Clean</a>.</p>
 {fig_dark}
-<p>{pct(min(dark_mid))}–{pct(max(dark_mid))} of the residual's raw energy through the
-middle half of depth sits in the quarter of directions the output matrix reads most
-weakly: a large component shared by every token, invisible to the lens. Input injection
-shows up as a sawtooth: each injection adds it back and the following blocks drain it.</p>
-</details>
 
 <h2>Caveats</h2>
 <ul>

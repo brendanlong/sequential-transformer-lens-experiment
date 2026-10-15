@@ -83,6 +83,17 @@ shows is what the model reads; a probe checks what the lens misses.
   checkpoints, one task — and the most favourable one for the lens, since the
   intermediate is also a trained output token.
 
+- **MLP neurons (two-hop, `looped_lm/twohop_neurons.py`).** A neuron-layer
+  counts as having one job if a single variable (head, either relation,
+  bridge, answer) explains ≥ 50% of its activation variance (adjusted eta²,
+  60,000 training compositions). Standard models: 33–39% of active
+  neuron-layers; the standard 8-layer model's first-relation neurons through
+  layers 3–6 only 11–13%. Looped models: 61–80%, with nearly every
+  first-relation neuron a bridge neuron once the bridge exists, and in the
+  4×4 / 4×8 models 71–90% of shared neurons keep the same job at the next
+  iteration. "Mixed" neurons may be doing fact lookups (entity × relation),
+  so mixed is not the same as polysemantic.
+
 ## Measurements
 
 At every effective layer (every block *execution* for looped models):
@@ -104,7 +115,11 @@ At every effective layer (every block *execution* for looped models):
   on 99–100% of tokens.
 - **Dark subspace**: the share of the normed residual's energy in the quarter
   of directions the readout (unembedding with the norm gain folded in) reads
-  most weakly. 25% for an isotropic vector. *Relative visibility* is
+  most weakly. 25% for an isotropic vector. **Correction:** in the IFM models
+  this is almost entirely one or two massive "sink" coordinates (37–89% of the
+  energy mid-depth, `looped_lm/ifm_sink.py`, `results/looped-lm/ifm-sink/`);
+  without them the weakest-read quarter holds 24–42%, near isotropic. The
+  input-injection sawtooth is the injection pushing the sink back up. *Relative visibility* is
   ‖W z‖² / ‖z‖² over its value for a random direction.
 - **How many tokens**: orthogonal matching pursuit of the batch-centered
   normed residual over the unit-norm unembedding rows, as R²(k) for k = 1…8,
