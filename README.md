@@ -61,6 +61,11 @@ lego/
   probe_lens_gap.py       # linear probes vs the lens: how much it sees (results/probe-lens-gap.md)
                           # (train.py takes --group S3|S4|A5|S5; the curriculum and analysis scripts are S3-only)
   tests/                  # fast CPU tests + a smoke training run
+looped_lm/                # lens vs probes on public looped/standard pairs (results/looped-lm.md)
+  twohop.py               # Kohli et al.'s two-hop models
+  ifm.py                  # IFM LoopedLM suite (separate env: looped_lm/jobs/ifm_env.sh)
+  lens_metrics.py         # probes, readout singular bands, sparse token reconstruction, outliers
+  report.py               # figures and tables;  Snakefile + jobs/ run the pipeline
 common/                   # checkpoint I/O + HF artifact download, optimizer, schedule, streaming, wandb
 results/                  # per-phase experiment logs linked from RESULTS.md
 scripts/                  # reproduction entry points (below)
@@ -118,6 +123,14 @@ model). In Model A, the lens sees each intermediate at the same layer as a
 probe but recovers only 37–81% of the signal there, and after that layer the
 state stays fully linearly decodable while the lens reads chance. In Model B,
 no intermediate is linearly decodable at any position probed.
+
+Also not in the writeup: [`results/looped-lm.md`](results/looped-lm.md) asks
+the original question (are weight-shared models more lens-readable?) on public
+looped/standard pairs that were trained on the same data, since ours learned
+different algorithms: Kohli et al.'s two-hop models and IFM's LoopedLM
+language-model suite (`looped_lm/`, run with `looped_lm/Snakefile`). On the
+two-hop task looping makes the intermediate lens-readable earlier; on the
+language models it does not.
 
 Every number in the writeup's five tables reproduces exactly from these
 checkpoints (n = 500 examples and `--seed 999` for the lens

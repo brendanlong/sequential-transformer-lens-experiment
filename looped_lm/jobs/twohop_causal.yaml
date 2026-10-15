@@ -1,0 +1,11 @@
+name: looped-lm-twohop-causal
+setup: uv sync --frozen --group looped
+command: uv run --no-sync --group looped snakemake -s looped_lm/Snakefile --cores 1 --config kohli_root=/home/claude/worktrees/ec318c16-fd0b-4e61-95e1-825e392be52d/ext/kohli -- results/looped-lm/twohop-causal/r1_l8_61.json results/looped-lm/twohop-causal/r1_l8_2001.json results/looped-lm/twohop-causal/r1_l4_41.json results/looped-lm/twohop-causal/r1_l4_13501.json results/looped-lm/twohop-causal/r2_l4_31.json results/looped-lm/twohop-causal/r2_l4_1201.json results/looped-lm/twohop-causal/r2_l4_7101.json results/looped-lm/twohop-causal/r4_l4_41.json results/looped-lm/twohop-causal/r4_l4_401.json results/looped-lm/twohop-causal/r4_l4_3501.json results/looped-lm/twohop-causal/r8_l4_71.json results/looped-lm/twohop-causal/r8_l4_301.json results/looped-lm/twohop-causal/r8_l4_2901.json 
+gpus: 1
+env:
+  PYTHONUNBUFFERED: "1"
+outputs:
+  - path: results/looped-lm
+priority: 50
+estimated_runtime_min: 30
+cleanup: never

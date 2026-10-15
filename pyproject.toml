@@ -19,6 +19,10 @@ dev = [
     "ruff==0.15.1",
     "pytest>=8.0",
 ]
+looped = [
+    "gdown>=6.4.0",
+    "snakemake>=9.27.0",
+]
 
 [tool.ruff]
 target-version = "py312"
@@ -41,7 +45,7 @@ ignore = []
 allowed-confusables = ["×", "−", "ℓ"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["common", "lego"]
+known-first-party = ["common", "lego", "looped_lm"]
 known-third-party = ["wandb"]  # a local wandb/ run dir must not flip classification
 
 [tool.pytest.ini_options]
@@ -70,7 +74,7 @@ exclude = [
 exclude-newer = "7 days"
 
 [tool.hatch.build.targets.wheel]
-packages = ["common", "lego"]
+packages = ["common", "lego", "looped_lm"]
 
 [build-system]
 requires = ["hatchling"]

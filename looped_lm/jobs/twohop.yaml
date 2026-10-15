@@ -1,0 +1,11 @@
+name: looped-lm-twohop
+setup: uv sync --frozen --group looped
+command: uv run --no-sync --group looped snakemake -s looped_lm/Snakefile --cores 1 --config kohli_root=/home/claude/worktrees/ec318c16-fd0b-4e61-95e1-825e392be52d/ext/kohli
+gpus: 1
+env:
+  PYTHONUNBUFFERED: "1"
+outputs:
+  - path: results/looped-lm
+priority: 50
+estimated_runtime_min: 150
+cleanup: never

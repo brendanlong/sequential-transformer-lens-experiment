@@ -1,0 +1,17 @@
+name: looped-lm-ifm
+setup: bash looped_lm/jobs/ifm_env.sh && ln -sfn "$GPUC_DATA_DIR/looped-lm-ifm/env" ifm-env
+python: ifm-env/bin/python
+command: bash looped_lm/jobs/ifm.sh
+gpus: 1
+use_shared: true
+env:
+  PYTHONUNBUFFERED: "1"
+  OMP_NUM_THREADS: "8"
+secrets: [AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, HF_TOKEN]
+outputs:
+  - path: results/looped-lm
+    s3: s3://brendanlong-experiments/looped-lm/{job_id}/results
+sync_interval_s: 300
+priority: 90
+auto_preempt: true
+estimated_runtime_min: 60

@@ -1,0 +1,1802 @@
+{
+ "checkpoint": "checkpoints/systematicity/r8_l4/checkpoint_epoch_71.pt",
+ "epoch": 70,
+ "iterations": 8,
+ "block_layers": 4,
+ "splits": {
+  "test_inferred_iid": {
+   "n": 1000,
+   "clean_accuracy": 0.02500000037252903,
+   "layers": [
+    {
+     "layer": 0,
+     "token_swap": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.03500000014901161,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.02200000174343586,
+      "answer_counterfactual": 0.0010000000474974513,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.012000000104308128,
+      "answer_counterfactual": 0.027000000700354576,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     }
+    },
+    {
+     "layer": 1,
+     "token_swap": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "token_steer": {
+      "answer_original": 0.009000000543892384,
+      "answer_counterfactual": 0.02200000174343586,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.01100000087171793,
+      "answer_counterfactual": 0.029000001028180122,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     }
+    },
+    {
+     "layer": 2,
+     "token_swap": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "token_steer": {
+      "answer_original": 0.010000000707805157,
+      "answer_counterfactual": 0.015000000596046448,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.024000000208616257,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.00800000037997961,
+      "answer_counterfactual": 0.03400000184774399,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     }
+    },
+    {
+     "layer": 3,
+     "token_swap": {
+      "answer_original": 0.024000000208616257,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "token_steer": {
+      "answer_original": 0.01100000087171793,
+      "answer_counterfactual": 0.015000000596046448,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.00800000037997961,
+      "answer_counterfactual": 0.032999999821186066,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     }
+    },
+    {
+     "layer": 4,
+     "token_swap": {
+      "answer_original": 0.024000000208616257,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "token_steer": {
+      "answer_original": 0.01100000087171793,
+      "answer_counterfactual": 0.015000000596046448,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.02200000174343586,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.010000000707805157,
+      "answer_counterfactual": 0.03200000151991844,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     }
+    },
+    {
+     "layer": 5,
+     "token_swap": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "token_steer": {
+      "answer_original": 0.010000000707805157,
+      "answer_counterfactual": 0.014000000432133675,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.02200000174343586,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.00800000037997961,
+      "answer_counterfactual": 0.03400000184774399,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     }
+    },
+    {
+     "layer": 6,
+     "token_swap": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0010000000474974513
+     },
+     "token_steer": {
+      "answer_original": 0.012000000104308128,
+      "answer_counterfactual": 0.012000000104308128,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.02200000174343586,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.010000000707805157,
+      "answer_counterfactual": 0.03100000135600567,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     }
+    },
+    {
+     "layer": 7,
+     "token_swap": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.007000000216066837
+     },
+     "token_steer": {
+      "answer_original": 0.012000000104308128,
+      "answer_counterfactual": 0.012000000104308128,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.02200000174343586,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.010000000707805157,
+      "answer_counterfactual": 0.027000000700354576,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.003000000026077032
+     }
+    },
+    {
+     "layer": 8,
+     "token_swap": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.04100000113248825
+     },
+     "token_steer": {
+      "answer_original": 0.01100000087171793,
+      "answer_counterfactual": 0.010000000707805157,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.02200000174343586,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.01100000087171793,
+      "answer_counterfactual": 0.02200000174343586,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.010000000707805157
+     }
+    },
+    {
+     "layer": 9,
+     "token_swap": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.07200000435113907
+     },
+     "token_steer": {
+      "answer_original": 0.013000000268220901,
+      "answer_counterfactual": 0.009000000543892384,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.02200000174343586,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.010000000707805157,
+      "answer_counterfactual": 0.026000000536441803,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.030000001192092896
+     }
+    },
+    {
+     "layer": 10,
+     "token_swap": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.15300001204013824
+     },
+     "token_steer": {
+      "answer_original": 0.014000000432133675,
+      "answer_counterfactual": 0.00800000037997961,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.02200000174343586,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.015000000596046448,
+      "answer_counterfactual": 0.026000000536441803,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.09200000762939453
+     }
+    },
+    {
+     "layer": 11,
+     "token_swap": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.23100000619888306
+     },
+     "token_steer": {
+      "answer_original": 0.015000000596046448,
+      "answer_counterfactual": 0.010000000707805157,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.02200000174343586,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.015000000596046448,
+      "answer_counterfactual": 0.023000001907348633,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.17800000309944153
+     }
+    },
+    {
+     "layer": 12,
+     "token_swap": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.28300002217292786
+     },
+     "token_steer": {
+      "answer_original": 0.013000000268220901,
+      "answer_counterfactual": 0.00800000037997961,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.02200000174343586,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.015000000596046448,
+      "answer_counterfactual": 0.02200000174343586,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.21400001645088196
+     }
+    },
+    {
+     "layer": 13,
+     "token_swap": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.2980000078678131
+     },
+     "token_steer": {
+      "answer_original": 0.014000000432133675,
+      "answer_counterfactual": 0.007000000216066837,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.018000001087784767,
+      "answer_counterfactual": 0.017000000923871994,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.25200000405311584
+     }
+    },
+    {
+     "layer": 14,
+     "token_swap": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.35600000619888306
+     },
+     "token_steer": {
+      "answer_original": 0.014000000432133675,
+      "answer_counterfactual": 0.007000000216066837,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.017000000923871994,
+      "answer_counterfactual": 0.013000000268220901,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.30000001192092896
+     }
+    },
+    {
+     "layer": 15,
+     "token_swap": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0010000000474974513,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.39900001883506775
+     },
+     "token_steer": {
+      "answer_original": 0.014000000432133675,
+      "answer_counterfactual": 0.007000000216066837,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.01600000075995922,
+      "answer_counterfactual": 0.013000000268220901,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.34300002455711365
+     }
+    },
+    {
+     "layer": 16,
+     "token_swap": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.3930000066757202
+     },
+     "token_steer": {
+      "answer_original": 0.014000000432133675,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.021000001579523087,
+      "answer_counterfactual": 0.013000000268220901,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.3460000157356262
+     }
+    },
+    {
+     "layer": 17,
+     "token_swap": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.38600000739097595
+     },
+     "token_steer": {
+      "answer_original": 0.013000000268220901,
+      "answer_counterfactual": 0.003000000026077032,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.02200000174343586,
+      "answer_counterfactual": 0.01100000087171793,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.3580000102519989
+     }
+    },
+    {
+     "layer": 18,
+     "token_swap": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.41600000858306885
+     },
+     "token_steer": {
+      "answer_original": 0.015000000596046448,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.02200000174343586,
+      "answer_counterfactual": 0.009000000543892384,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.37400001287460327
+     }
+    },
+    {
+     "layer": 19,
+     "token_swap": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.42600002884864807
+     },
+     "token_steer": {
+      "answer_original": 0.01600000075995922,
+      "answer_counterfactual": 0.004000000189989805,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0010000000474974513,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.024000000208616257,
+      "answer_counterfactual": 0.009000000543892384,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.3930000066757202
+     }
+    },
+    {
+     "layer": 20,
+     "token_swap": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.41600000858306885
+     },
+     "token_steer": {
+      "answer_original": 0.015000000596046448,
+      "answer_counterfactual": 0.003000000026077032,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.02500000037252903,
+      "answer_counterfactual": 0.004000000189989805,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.3840000033378601
+     }
+    },
+    {
+     "layer": 21,
+     "token_swap": {
+      "answer_original": 0.024000000208616257,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.42500001192092896
+     },
+     "token_steer": {
+      "answer_original": 0.01600000075995922,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.026000000536441803,
+      "answer_counterfactual": 0.004000000189989805,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.39000001549720764
+     }
+    },
+    {
+     "layer": 22,
+     "token_swap": {
+      "answer_original": 0.024000000208616257,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.4320000112056732
+     },
+     "token_steer": {
+      "answer_original": 0.017000000923871994,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0010000000474974513,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.026000000536441803,
+      "answer_counterfactual": 0.003000000026077032,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.4020000100135803
+     }
+    },
+    {
+     "layer": 23,
+     "token_swap": {
+      "answer_original": 0.024000000208616257,
+      "answer_counterfactual": 0.0010000000474974513,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.4400000274181366
+     },
+     "token_steer": {
+      "answer_original": 0.018000001087784767,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.024000000208616257,
+      "answer_counterfactual": 0.0010000000474974513,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.003000000026077032,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.40800002217292786
+     }
+    },
+    {
+     "layer": 24,
+     "token_swap": {
+      "answer_original": 0.024000000208616257,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.4350000321865082
+     },
+     "token_steer": {
+      "answer_original": 0.018000001087784767,
+      "answer_counterfactual": 0.0010000000474974513,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.024000000208616257,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.024000000208616257,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.4090000092983246
+     }
+    },
+    {
+     "layer": 25,
+     "token_swap": {
+      "answer_original": 0.024000000208616257,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.4300000071525574
+     },
+     "token_steer": {
+      "answer_original": 0.02200000174343586,
+      "answer_counterfactual": 0.0010000000474974513,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.024000000208616257,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.02500000037252903,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.41600000858306885
+     }
+    },
+    {
+     "layer": 26,
+     "token_swap": {
+      "answer_original": 0.024000000208616257,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.43700000643730164
+     },
+     "token_steer": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.0010000000474974513,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.024000000208616257,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.023000001907348633,
+      "answer_counterfactual": 0.003000000026077032,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.4130000174045563
+     }
+    },
+    {
+     "layer": 27,
+     "token_swap": {
+      "answer_original": 0.024000000208616257,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.4440000355243683
+     },
+     "token_steer": {
+      "answer_original": 0.024000000208616257,
+      "answer_counterfactual": 0.0010000000474974513,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.024000000208616257,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.024000000208616257,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.4190000295639038
+     }
+    },
+    {
+     "layer": 28,
+     "token_swap": {
+      "answer_original": 0.024000000208616257,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.4350000321865082
+     },
+     "token_steer": {
+      "answer_original": 0.02200000174343586,
+      "answer_counterfactual": 0.0010000000474974513,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.024000000208616257,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.02500000037252903,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.42900002002716064
+     }
+    },
+    {
+     "layer": 29,
+     "token_swap": {
+      "answer_original": 0.024000000208616257,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.4220000207424164
+     },
+     "token_steer": {
+      "answer_original": 0.026000000536441803,
+      "answer_counterfactual": 0.0010000000474974513,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.024000000208616257,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.02500000037252903,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.4130000174045563
+     }
+    },
+    {
+     "layer": 30,
+     "token_swap": {
+      "answer_original": 0.024000000208616257,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.4360000193119049
+     },
+     "token_steer": {
+      "answer_original": 0.024000000208616257,
+      "answer_counterfactual": 0.0010000000474974513,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.024000000208616257,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.02500000037252903,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.4230000078678131
+     }
+    },
+    {
+     "layer": 31,
+     "token_swap": {
+      "answer_original": 0.02500000037252903,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.44300001859664917
+     },
+     "token_steer": {
+      "answer_original": 0.02500000037252903,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.02500000037252903,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.02500000037252903,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.4280000329017639
+     }
+    },
+    {
+     "layer": 32,
+     "token_swap": {
+      "answer_original": 0.02500000037252903,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.44300001859664917
+     },
+     "token_steer": {
+      "answer_original": 0.02500000037252903,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.02500000037252903,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.02500000037252903,
+      "answer_counterfactual": 0.0020000000949949026,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.44600000977516174
+     }
+    }
+   ]
+  },
+  "test_inferred_ood": {
+   "n": 1000,
+   "clean_accuracy": 0.0,
+   "layers": [
+    {
+     "layer": 0,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.02200000174343586,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.0010000000474974513,
+      "answer_counterfactual": 0.039000000804662704,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     }
+    },
+    {
+     "layer": 1,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.02500000037252903,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.029000001028180122,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     }
+    },
+    {
+     "layer": 2,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "token_steer": {
+      "answer_original": 0.0010000000474974513,
+      "answer_counterfactual": 0.020000001415610313,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.03100000135600567,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     }
+    },
+    {
+     "layer": 3,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "token_steer": {
+      "answer_original": 0.0010000000474974513,
+      "answer_counterfactual": 0.017000000923871994,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.03700000047683716,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     }
+    },
+    {
+     "layer": 4,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "token_steer": {
+      "answer_original": 0.0010000000474974513,
+      "answer_counterfactual": 0.01600000075995922,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.032999999821186066,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     }
+    },
+    {
+     "layer": 5,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "token_steer": {
+      "answer_original": 0.0010000000474974513,
+      "answer_counterfactual": 0.021000001579523087,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.03400000184774399,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     }
+    },
+    {
+     "layer": 6,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "token_steer": {
+      "answer_original": 0.0010000000474974513,
+      "answer_counterfactual": 0.020000001415610313,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.03400000184774399,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     }
+    },
+    {
+     "layer": 7,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.018000001087784767,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.032999999821186066,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.003000000026077032
+     }
+    },
+    {
+     "layer": 8,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.005000000353902578
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.01600000075995922,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.03500000014901161,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.009000000543892384
+     }
+    },
+    {
+     "layer": 9,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.010000000707805157
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.017000000923871994,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.029000001028180122,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.03200000151991844
+     }
+    },
+    {
+     "layer": 10,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.017000000923871994
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.012000000104308128,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.027000000700354576,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0820000022649765
+     }
+    },
+    {
+     "layer": 11,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.02800000086426735
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.01100000087171793,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.02200000174343586,
+      "lens_reads_b": 0.0010000000474974513,
+      "lens_reads_b_alt": 0.17000000178813934
+     }
+    },
+    {
+     "layer": 12,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.04800000041723251
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.012000000104308128,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.020000001415610313,
+      "lens_reads_b": 0.0010000000474974513,
+      "lens_reads_b_alt": 0.21700000762939453
+     }
+    },
+    {
+     "layer": 13,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.058000002056360245
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.010000000707805157,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.02200000174343586,
+      "lens_reads_b": 0.0020000000949949026,
+      "lens_reads_b_alt": 0.25600001215934753
+     }
+    },
+    {
+     "layer": 14,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0690000057220459
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.012000000104308128,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.018000001087784767,
+      "lens_reads_b": 0.0010000000474974513,
+      "lens_reads_b_alt": 0.30100002884864807
+     }
+    },
+    {
+     "layer": 15,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.08300000429153442
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.009000000543892384,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.014000000432133675,
+      "lens_reads_b": 0.0010000000474974513,
+      "lens_reads_b_alt": 0.34800001978874207
+     }
+    },
+    {
+     "layer": 16,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.09600000083446503
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.00800000037997961,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.017000000923871994,
+      "lens_reads_b": 0.0010000000474974513,
+      "lens_reads_b_alt": 0.3450000286102295
+     }
+    },
+    {
+     "layer": 17,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.09600000083446503
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.00800000037997961,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.01600000075995922,
+      "lens_reads_b": 0.0010000000474974513,
+      "lens_reads_b_alt": 0.35600000619888306
+     }
+    },
+    {
+     "layer": 18,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.10400000214576721
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.009000000543892384,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.013000000268220901,
+      "lens_reads_b": 0.0010000000474974513,
+      "lens_reads_b_alt": 0.37800002098083496
+     }
+    },
+    {
+     "layer": 19,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.11800000816583633
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.00800000037997961,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0010000000474974513
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.013000000268220901,
+      "lens_reads_b": 0.0010000000474974513,
+      "lens_reads_b_alt": 0.3930000066757202
+     }
+    },
+    {
+     "layer": 20,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.11900000274181366
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.00800000037997961,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0010000000474974513
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.013000000268220901,
+      "lens_reads_b": 0.0010000000474974513,
+      "lens_reads_b_alt": 0.3800000250339508
+     }
+    },
+    {
+     "layer": 21,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.1210000067949295
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.006000000052154064,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0010000000474974513
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.012000000104308128,
+      "lens_reads_b": 0.0010000000474974513,
+      "lens_reads_b_alt": 0.3840000033378601
+     }
+    },
+    {
+     "layer": 22,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.12700000405311584
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.006000000052154064,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0010000000474974513
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.007000000216066837,
+      "lens_reads_b": 0.0010000000474974513,
+      "lens_reads_b_alt": 0.39100003242492676
+     }
+    },
+    {
+     "layer": 23,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.1290000081062317
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.006000000052154064,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0010000000474974513
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0010000000474974513,
+      "lens_reads_b_alt": 0.3920000195503235
+     }
+    },
+    {
+     "layer": 24,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.13500000536441803
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.006000000052154064,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0010000000474974513
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.006000000052154064,
+      "lens_reads_b": 0.0010000000474974513,
+      "lens_reads_b_alt": 0.3840000033378601
+     }
+    },
+    {
+     "layer": 25,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.13600000739097595
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0010000000474974513
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0010000000474974513,
+      "lens_reads_b_alt": 0.3890000283718109
+     }
+    },
+    {
+     "layer": 26,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.15300001204013824
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0020000000949949026
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.3880000114440918
+     }
+    },
+    {
+     "layer": 27,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.15400001406669617
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.004000000189989805,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0020000000949949026
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.006000000052154064,
+      "lens_reads_b": 0.0010000000474974513,
+      "lens_reads_b_alt": 0.4010000228881836
+     }
+    },
+    {
+     "layer": 28,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.15000000596046448
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0010000000474974513
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.006000000052154064,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.398000031709671
+     }
+    },
+    {
+     "layer": 29,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.15400001406669617
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.006000000052154064,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0010000000474974513
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.006000000052154064,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.38700002431869507
+     }
+    },
+    {
+     "layer": 30,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.15200001001358032
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.006000000052154064,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0020000000949949026
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.006000000052154064,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.3920000195503235
+     }
+    },
+    {
+     "layer": 31,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.14500001072883606
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0020000000949949026
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.006000000052154064,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.3970000147819519
+     }
+    },
+    {
+     "layer": 32,
+     "token_swap": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.14500001072883606
+     },
+     "token_steer": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 1.0
+     },
+     "token_ablate": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.0020000000949949026
+     },
+     "full_patch": {
+      "answer_original": 0.0,
+      "answer_counterfactual": 0.005000000353902578,
+      "lens_reads_b": 0.0,
+      "lens_reads_b_alt": 0.406000018119812
+     }
+    }
+   ]
+  }
+ }
+}

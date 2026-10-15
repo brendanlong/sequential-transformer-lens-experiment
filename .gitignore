@@ -220,3 +220,8 @@ __marimo__/
 # Project data (checkpoints, downloaded artifacts, figures)
 data/
 wandb/
+
+# looped_lm downloads (checkpoints, data)
+ext/
+.snakemake/
+ifm-env
