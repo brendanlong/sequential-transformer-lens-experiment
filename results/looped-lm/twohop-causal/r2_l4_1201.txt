@@ -1,0 +1,24 @@
+
+checkpoints/systematicity/r2_l4/checkpoint_epoch_1201.pt test_inferred_iid: clean accuracy 99%
+  L  swap->t2  swap->t  lens->b2  steer->t2  ablate->t  patch->t2  patch->t
+  0        0%      99%        0%         3%        99%         2%        2%
+  1        0%      98%        1%        48%        98%        58%        0%
+  2        0%      95%       29%        42%        96%        89%        0%
+  3        1%      93%       60%        11%        96%        92%        0%
+  4        0%      99%       89%         0%        99%         0%       98%
+  5        0%      99%       99%         0%        99%         0%       98%
+  6        0%      99%       92%         0%        99%         0%       99%
+  7        0%      99%       65%         0%        99%         0%       99%
+  8        0%      99%       59%         0%        99%         0%       99%
+
+checkpoints/systematicity/r2_l4/checkpoint_epoch_1201.pt test_inferred_ood: clean accuracy 0%
+  L  swap->t2  swap->t  lens->b2  steer->t2  ablate->t  patch->t2  patch->t
+  0        0%       0%        0%         3%         0%         0%        0%
+  1        0%       0%        0%        50%         0%        60%        0%
+  2        1%       0%       17%        44%         0%        91%        0%
+  3        2%       0%       64%        14%         0%        93%        0%
+  4        1%       0%       87%         1%         0%         1%        0%
+  5        1%       0%       92%         1%         0%         1%        0%
+  6        0%       0%       61%         0%         0%         0%        0%
+  7        0%       0%       32%         0%         0%         0%        0%
+  8        0%       0%       25%         0%         0%         0%        0%

@@ -1,0 +1,30 @@
+kohli_root: ext/kohli
+# r<R>_l<L>: L layers applied R times. Epochs mark Kohli et al.'s stages:
+# train-fit / in-distribution generalisation / OOD (systematic) generalisation.
+twohop_checkpoints:
+  - checkpoints/systematicity/r1_l8/checkpoint_epoch_61.pt
+  - checkpoints/systematicity/r1_l8/checkpoint_epoch_2001.pt
+  - checkpoints/systematicity/r1_l4/checkpoint_epoch_41.pt
+  - checkpoints/systematicity/r1_l4/checkpoint_epoch_13501.pt
+  - checkpoints/systematicity/r2_l4/checkpoint_epoch_31.pt
+  - checkpoints/systematicity/r2_l4/checkpoint_epoch_1201.pt
+  - checkpoints/systematicity/r2_l4/checkpoint_epoch_7101.pt
+  - checkpoints/systematicity/r4_l4/checkpoint_epoch_41.pt
+  - checkpoints/systematicity/r4_l4/checkpoint_epoch_401.pt
+  - checkpoints/systematicity/r4_l4/checkpoint_epoch_3501.pt
+  - checkpoints/systematicity/r8_l4/checkpoint_epoch_71.pt
+  - checkpoints/systematicity/r8_l4/checkpoint_epoch_301.pt
+  - checkpoints/systematicity/r8_l4/checkpoint_epoch_2901.pt
+
+# IFM LoopedLM Part I, all at 336B tokens. d28 matches the loop models' stored
+# parameters, d112 their executed depth (28 x 4 = 8 + 12 x 8 + 8 = 112).
+ifm_root: ext/ifm
+ifm_python: python
+ifm_args: ""
+ifm_models:
+  - dense-d28-336b
+  - dense-d112-336b
+  - dense-ouro-336b
+  - dense-ouro-raw-injection-336b
+  - dense-middle-336b
+  - dense-huginn-336b
