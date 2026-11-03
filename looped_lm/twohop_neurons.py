@@ -37,7 +37,7 @@ import torch
 import torch.nn.functional as F
 from torch import Tensor
 
-from looped_lm.twohop import Examples, load_data, load_model
+from looped_lm.twohop import Block, Examples, RecurrentGPT2, load_data, load_model
 
 POSITIONS = {
     "r1": (1, ("h", "r1", "bridge")),
@@ -56,7 +56,9 @@ def variables(ex: Examples) -> dict[str, Tensor]:
 
 
 @torch.no_grad()
-def executions(model: torch.nn.Module, ids: Tensor, batch: int = 8192):  # noqa: ANN201
+def executions(  # noqa: ANN201
+    model: RecurrentGPT2, ids: Tensor, batch: int = 8192
+):
     """Yield (execution, MLP hidden activations at positions 1-2) block by block.
 
     Keeps only the current residual stream, so memory does not grow with depth.
@@ -66,6 +68,7 @@ def executions(model: torch.nn.Module, ids: Tensor, batch: int = 8192):  # noqa:
     k = 0
     for _ in range(model.n_iterations):
         for block in model.blocks:
+            assert isinstance(block, Block)
             acts, nxt = [], []
             for s in range(0, len(ids), batch):
                 xb = x[s : s + batch]
@@ -116,7 +119,9 @@ def main() -> None:
     vocab, probe_set, _evals = load_data(root, args.n, 10, args.seed)
     names = {i: t for t, i in vocab.items()}
     var = {k: v.to(device) for k, v in variables(probe_set).items()}
-    n_hidden = model.blocks[0].mlp.c_fc.weight.shape[1]
+    first = model.blocks[0]
+    assert isinstance(first, Block)
+    n_hidden = first.mlp.c_fc.weight.shape[1]
     n_vocab = len(vocab)
     tops: dict[tuple[int, int], list[int]] = {}  # (execution, neuron) -> top examples
 
@@ -183,7 +188,7 @@ def main() -> None:
             )
         rows.append(row)
         best_label.append(labels_e)
-        del a, x
+        del a
         torch.cuda.empty_cache()
         print(f"exec {e1}: {row['positions']['r2']['counts']}", flush=True)
 

@@ -11,6 +11,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.axes import Axes
 
 # Categorical slots from the dataviz reference palette, in fixed order.
 COLORS = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300"]
@@ -44,7 +45,7 @@ IFM_NAMES = {
 }
 
 
-def style(ax: plt.Axes) -> None:
+def style(ax: Axes) -> None:
     ax.spines[["top", "right"]].set_visible(False)
     ax.spines[["left", "bottom"]].set_color(MUTED)
     ax.tick_params(colors=MUTED, labelcolor=INK, labelsize=8)
