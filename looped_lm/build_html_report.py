@@ -1361,7 +1361,9 @@ def main() -> None:
     title, body = build(args.results)
     page = args.template.read_text().replace("{{TITLE}}", esc(title))
     if 'name="robots"' not in page:  # unpublished research stays out of search
-        page = page.replace("<head>", '<head>\n<meta name="robots" content="noindex">', 1)
+        page = page.replace(
+            "<head>", '<head>\n<meta name="robots" content="noindex">', 1
+        )
     args.out.write_text(page.replace("{{BODY}}", body))
 
 
